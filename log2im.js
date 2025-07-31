@@ -2,7 +2,7 @@
 // const path = require('path');
 import fs from 'fs';
 import path from 'path';
-import { readFile } from 'node:fs/promises';
+import {readFile} from 'node:fs/promises';
 
 
 // Utility functions
@@ -26,7 +26,7 @@ const readFromFile = async (filename) => {
 
 const writeToFile = async (filename, data) => {
     try {
-        await fs.mkdir(path.dirname(filename), { recursive: true });
+        await fs.mkdir(path.dirname(filename), {recursive: true});
         await fs.writeFile(filename, JSON.stringify(data, null, 4), 'utf8');
         return true;
     } catch (error) {
@@ -52,7 +52,7 @@ export class Log2im {
      */
     async sendToLineNotify(message, token, imagePath = null) {
         const url = 'https://notify-api.line.me/api/notify';
-        const headers = { 'Authorization': `Bearer ${token}` };
+        const headers = {'Authorization': `Bearer ${token}`};
 
         try {
             let body;
@@ -196,6 +196,7 @@ export class Log2im {
             throw error;
         }
     }
+
     async getChatID_Telegram(token) {
         const url = `https://api.telegram.org/bot${token}/getUpdates`;
         try {
@@ -204,8 +205,8 @@ export class Log2im {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json(); // Parse the JSON response
-            const chatid=data['result'][0]['message']['chat']['id']
-            console.log('[][][getChatID_Telegram]chatid=',chatid,JSON.stringify(data)); // Log the entire response for inspection
+            const chatid = data['result'][0]['message']['chat']['id']
+            console.log('[][][getChatID_Telegram]chatid=', chatid, JSON.stringify(data)); // Log the entire response for inspection
             return chatid; // Return the parsed JSON
         } catch (error) {
             console.error('Error getting Telegram updates:', error);
@@ -214,6 +215,7 @@ export class Log2im {
 
 
     }
+
     /**
      * Send message to Telegram
      * @param {string} message - Message to send
@@ -222,36 +224,36 @@ export class Log2im {
      * @param {string} images - Path to image file (optional)
      * @returns {Promise<object>} Response from Telegram API
      */
-    async sendToTelegram({text,images, token, chatid }) {
+    async sendToTelegram({text, images, token, chatid}) {
         // console.log('[][][sendToTelegram]text=',text,images, token, chatid)
         try {
-            if(chatid||chatid.length<1)
-                chatid=await this.getChatID_Telegram(token)
+            if (chatid || chatid.length < 1)
+                chatid = await this.getChatID_Telegram(token)
             const baseUrl = `https://api.telegram.org/bot${token}`;
 
 
-            let responseData=undefined;
+            let responseData = undefined;
             if (text) {
-                const url=baseUrl+'/sendMessage'
+                const url = baseUrl + '/sendMessage'
                 console.log(`[][][sendToTelegram] text=${text} chatid=${chatid} url=${url}`)
                 try {
                     await fetch(url, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             chat_id: chatid,
                             text: text
                         })
-                    }).then(res=> {
+                    }).then(res => {
                         return res.json()
-                    }).then(res=> {
+                    }).then(res => {
                         this.telegramBotHistory.push({
                             timestamp: new Date().toISOString(),
                             status: 'success',
                             message: 'Message sent to Telegram',
                             response: res
                         });
-                        console.log('[][][sendToTelegram]res',res)
+                        console.log('[][][sendToTelegram]res', res)
                         return res
                     });
 
@@ -261,29 +263,29 @@ export class Log2im {
                 }
             }
             if (images.filepath) {
-                const url=baseUrl+'/sendPhoto'
+                const url = baseUrl + '/sendPhoto'
                 console.log(`[][T][sendPhoto] images.filepath=${images.filepath} chatid=${chatid} url=${url}`)
                 try {
                     const imageBuffer = await readFile(images.filepath);
-                    const imageBlob = new Blob([imageBuffer], { type: 'image/jpeg' }); // Adjust MIME type as needed
+                    const imageBlob = new Blob([imageBuffer], {type: 'image/jpeg'}); // Adjust MIME type as needed
                     const formData = new FormData();
-                    formData.append('chat_id',chatid)
-                    formData.append('caption',text)
-                    formData.append('photo',imageBlob)
+                    formData.append('chat_id', chatid)
+                    formData.append('caption', text)
+                    formData.append('photo', imageBlob)
                     await fetch(url, {
                         method: 'POST',
                         // headers: { 'Content-Type': 'multipart/form-data' },
                         body: formData
-                    }).then(res=> {
+                    }).then(res => {
                         return res.json()
-                    }).then(res=> {
+                    }).then(res => {
                         this.telegramBotHistory.push({
                             timestamp: new Date().toISOString(),
                             status: 'success',
                             message: 'Photo sent to Telegram',
                             response: res
                         });
-                        console.log('[][T][sendPhoto]res',res)
+                        console.log('[][T][sendPhoto]res', res)
                         return res
                     });
 
@@ -292,10 +294,6 @@ export class Log2im {
                     throw error;
                 }
             }
-
-
-
-
 
             return responseData;
         } catch (error) {
@@ -320,80 +318,117 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from Discord API
      */
-    async sendToDiscord(message, webhookUrl, username = 'SD-WebUI Bot', imagePath = null) {
+    async sendToDiscord({text, images, token, chatid, clientid}) {
         try {
-            const payload = {
-                username: username,
-                content: message,
-                embeds: []
-            };
+            console.log('[Discord]', text, token, chatid, clientid)
 
-            if (imagePath) {
-                const imageFile = await fs.readFile(imagePath);
-                const filename = path.basename(imagePath);
+            const addBotintoChannel = `https://discord.com/oauth2/authorize?client_id=${clientid}&permissions=2048&integration_type=0&scope=bot`
+            console.log('[Discord][add bot into channel url][ clientid != chatid ]', addBotintoChannel)
+            if (chatid || chatid.length < 1)
+                console.log('[Discord][chatid][ get chatid from desktop app(right click channel then copy it)]')
 
-                payload.embeds.push({
-                    image: { url: `attachment://${filename}` }
-                });
+            const baseUrl = `https://discord.com/api/v10/channels/${chatid}/messages`;
 
-                const formData = createFormData({
-                    payload_json: JSON.stringify(payload),
-                    file: {
-                        file: imageFile,
-                        filename: filename,
-                        contentType: 'image/png'
-                    }
-                });
 
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    body: formData.body,
-                    headers: formData.headers
-                });
+            let responseData = undefined;
+            if (text) {
+                const url = baseUrl
+                console.log(`[][][Discord] text=${text} chatid=${chatid} url=${url}`)
+                try {
+                    await fetch(url, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', "Authorization": 'Bot ' + token},
+                        body: JSON.stringify({
+                            tts: false,
+                            content: '[text]'+text
+                        })
+                    }).then(res => {
+                        return res.json()
+                    }).then(res => {
+                        this.telegramBotHistory.push({
+                            timestamp: new Date().toISOString(),
+                            status: 'success',
+                            message: 'Message sent to Telegram',
+                            response: res
+                        });
+                        console.log('[][][Discord]res', res)
+                        return res
+                    });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                } catch (error) {
+                    console.error('Error getting Discord updates:', error);
+                    throw error;
                 }
-
-                const responseData = await response.json().catch(() => ({}));
-
-                this.discordBotHistory.push({
-                    timestamp: new Date().toISOString(),
-                    status: 'success',
-                    message: 'Message with image sent to Discord',
-                    response: responseData
-                });
-
-                return responseData;
-            } else {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const responseData = await response.json().catch(() => ({}));
-
-                this.discordBotHistory.push({
-                    timestamp: new Date().toISOString(),
-                    status: 'success',
-                    message: 'Message sent to Discord',
-                    response: responseData
-                });
-
-                return responseData;
             }
-        } catch (error) {
-            console.error('Error sending to Discord:', error.message);
+            if (images.filepath) {
+                const url = baseUrl
+                console.log(`[][][Discord] images=${images.filepath} chatid=${chatid} url=${url}`)
+                try {
+                    const filename=path.basename(images.filepath)
+                    const imageBuffer = await readFile(images.filepath);
+                    const imageBlob = new Blob([imageBuffer], {type: 'image/jpeg'}); // Adjust MIME type as needed
+                    const att = {
+                        id: 0,
+                        description: filename,
+                        filename: filename,
+                        title: filename,
+                        image: {
+                             // "url": images.url
+                            url: "attachment://" + filename
+                        },
+                        thumbnail: {
+                            // "url": images.url
+                            url: "attachment://" + filename
+                        },
 
-            this.discordBotHistory.push({
+                    }
+                    console.log(`[][][Discord] att=${att}`,att)
+
+                    const filesObj={}
+                    filesObj[filename]=imageBlob
+
+                    await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                            "Authorization": 'Bot ' + token},
+                        body:JSON.stringify({
+                            content: '[att]'+text,
+                            // embeds: [att],
+                            attachments:[att],
+                            // files:filesObj
+                        }),
+                        files:filesObj
+
+                    }).then(res => {
+                        return res.json()
+                    }).then(res => {
+                        this.telegramBotHistory.push({
+                            timestamp: new Date().toISOString(),
+                            status: 'success',
+                            message: 'Photo sent to Discord',
+                            response: res
+                        });
+                        console.log('[][T][sendPhoto]res', res)
+                        return res
+                    });
+
+                } catch (error) {
+                    console.error('Error getting Discord updates:', error);
+                    throw error;
+                }
+            }
+
+
+            return responseData;
+        } catch (error) {
+            console.error('Error sending to Discord:', error);
+
+            this.telegramBotHistory.push({
                 timestamp: new Date().toISOString(),
                 status: 'error',
-                message: 'Failed to send to Discord',
+                message: 'Failed to send to Telegram',
                 error: error.message
             });
 
@@ -406,26 +441,46 @@ export class Log2im {
      * @param {Object} options - Configuration options
 
      */
-    async sendToAll({line,telegram,discord,text,images}) {
+    async sendToAll({line, telegram, discord, text, images}) {
         const results = {
-            line: { success: false },
-            telegram: { success: false },
-            discord: { success: false }
+            line: {success: false},
+            telegram: {success: false},
+            discord: {success: false}
         };
-        // Send to Telegram if configured
-        if (telegram.token ) {
+        // Send to Discord if configured
+        if (discord.token) {
             try {
-                results.telegram = {
+                results.discord = {
                     success: true,
-                    response: await this.sendToTelegram({text:text, images:images, token:telegram.token,chatid:telegram.chatid})
+                    response: await this.sendToDiscord({
+                        text: text,
+                        images: images,
+                        token: discord.token,
+                        chatid: discord.chatid,
+                        clientid: discord.clientid
+                    })
                 };
             } catch (error) {
-                results.telegram = {
+                results.discord = {
                     success: false,
                     error: error.message
                 };
             }
         }
+        // Send to Telegram if configured
+        // if (telegram.token ) {
+        //     try {
+        //         results.telegram = {
+        //             success: true,
+        //             response: await this.sendToTelegram({text:text, images:images, token:telegram.token,chatid:telegram.chatid})
+        //         };
+        //     } catch (error) {
+        //         results.telegram = {
+        //             success: false,
+        //             error: error.message
+        //         };
+        //     }
+        // }
         // // Send to LINE Messaging API if configured
         // if (line.token ) {
         //     try {
@@ -443,20 +498,7 @@ export class Log2im {
         //
         //
         //
-        // // Send to Discord if configured
-        // if (discord.token) {
-        //     try {
-        //         results.discord = {
-        //             success: true,
-        //             response: await this.sendToDiscord(discord)
-        //         };
-        //     } catch (error) {
-        //         results.discord = {
-        //             success: false,
-        //             error: error.message
-        //         };
-        //     }
-        // }
+
 
         return results;
     }

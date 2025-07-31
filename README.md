@@ -1,6 +1,32 @@
 # Log2IM (node version)
 * small. use native node lib, no other needs.
-* send anything to your IM realtime as log. 
+* send anything to your IM realtime as log.
+* https://decade.tw
+
+### Usage
+
+```javascript
+const {Log2im} = require("log2im/log2im.js");
+
+const log2IM_Config = {
+    text:`wahaha@${Date.now()}`,
+    images:{
+      url:'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
+      filepath: '/Users/x/Pictures/D.png', //imageOption1
+      base64: base64Example //imageOption2
+    },
+    line: {token: ''},
+    telegram: {token: '11111:xxxxxxxxxxxxxxxxxxxxxx', chatid: '1967680189'},
+    discord: {token: '', chatid: ''},
+    imgur: {token: ''}
+    
+    const log2IM = new Log2im();
+    log2IM_Config.text='init solar proxy'
+    log2IM.sendToAll(log2IM_Config).then(r => {
+        console.log("[DECADE.TW][log2im][ok]")
+    })
+}
+```
 
 ## IMs Support 
 <table style="border-width:0px">
