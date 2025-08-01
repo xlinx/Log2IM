@@ -34,7 +34,52 @@ const writeToFile = async (filename, data) => {
         return false;
     }
 };
+const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader;
+    reader.onerror = reject;
+    reader.onload = () => {
+        resolve(reader.result);
+    };
+    reader.readAsDataURL(blob);
+});
+const b64toBlob = (base64Data) => new Promise(  (resolve, reject) => {
+    const base64Response =  fetch(`data:image/jpeg;base64,${base64Data}`).then((response) => response.blob()).then((myBlob) => {
+        return myBlob
+    });
 
+});
+const b64toBlob2 = (b64Data, contentType='image/jpeg', sliceSize=512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    return new Blob(byteArrays, {type: contentType});
+}
+const readtoBase64 = async (filepath) => {
+    try {
+        const fileBuffer = await readFile(filepath);
+        return fileBuffer.toString('base64');
+    } catch (error) {
+        throw new Error(`Failed to read file as base64: ${error.message}`);
+    }
+};
+// const readImg2B64 = async form =>{
+//     var files = form.files;
+//     if (files.length === 0)
+//         return;
+//     let data = await resizeImage(window.URL.createObjectURL(files[0]))
+//     document.querySelector('#img').src = data;
+//     return  data.split(",")[1] // get only base64
+//     // sendMessage(b64toBlob(b64), { content: 'Resized Image'})
+// }
 // Message Sending Functions
 export class Log2im {
     constructor() {
@@ -340,7 +385,7 @@ export class Log2im {
                         headers: {'Content-Type': 'application/json', "Authorization": 'Bot ' + token},
                         body: JSON.stringify({
                             tts: false,
-                            content: '[text]'+text
+                            content: '[text]' + text
                         })
                     }).then(res => {
                         return res.json()
@@ -363,43 +408,53 @@ export class Log2im {
             if (images.filepath) {
                 const url = baseUrl
                 console.log(`[][][Discord] images=${images.filepath} chatid=${chatid} url=${url}`)
+                const filename = path.basename(images.filepath)
+                const emb = {
+                    // id: 0,filename: filename,
+                    // title: filename,description: filename,
+                    // thumbnail: {
+                    //     // "url": images.url
+                    //     url: "attachment://" + filename
+                    // },
+                    image: {
+                        // "url": images.url
+                        url: "attachment://" + filename
+                    },
+                }
+                const att = {
+                    id: 0,description: filename,filename: filename,
+                }
+                const messageRef={
+                    message_id: "1400719999336710275"
+                }
                 try {
-                    const filename=path.basename(images.filepath)
-                    const imageBuffer = await readFile(images.filepath);
-                    const imageBlob = new Blob([imageBuffer], {type: 'image/jpeg'}); // Adjust MIME type as needed
-                    const att = {
-                        id: 0,
-                        description: filename,
-                        filename: filename,
-                        title: filename,
-                        image: {
-                             // "url": images.url
-                            url: "attachment://" + filename
-                        },
-                        thumbnail: {
-                            // "url": images.url
-                            url: "attachment://" + filename
-                        },
 
+                    const screenShotBase64=await readtoBase64(images.filepath)
+                    // console.log('screenShotBase64',screenShotBase64)
+                    const imageBlob =  b64toBlob2(screenShotBase64)
+                    // console.log('imageBlob',imageBlob)
+
+                    const contentX={
+                        content: '[att]' + text,
+                        // embeds: JSON.stringify([emb]),
+                        // message_reference: {
+                        //     message_id: "1400719999336710275"
+                        // },
+                        // attachments: JSON.stringify([att]),
                     }
-                    console.log(`[][][Discord] att=${att}`,att)
-
-                    const filesObj={}
-                    filesObj[filename]=imageBlob
-
+                    const filesObj = {}
+                    filesObj[filename] = imageBlob
+                    let formData = new FormData();
+                    formData.append('json',JSON.stringify(contentX))
+                    formData.append('files',imageBlob,filename)
+                    // formData.append('files',imageBlob)
+                    console.log('formData',(formData))
                     await fetch(url, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
-                            // 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-                            "Authorization": 'Bot ' + token},
-                        body:JSON.stringify({
-                            content: '[att]'+text,
-                            // embeds: [att],
-                            attachments:[att],
-                            // files:filesObj
-                        }),
-                        files:filesObj
+                            "Authorization": 'Bot ' + token,
+                        },
+                        body: formData,
 
                     }).then(res => {
                         return res.json()
@@ -436,6 +491,7 @@ export class Log2im {
         }
     }
 
+
     /**
      * Send message to all configured services
      * @param {Object} options - Configuration options
@@ -449,6 +505,7 @@ export class Log2im {
         };
         // Send to Discord if configured
         if (discord.token) {
+
             try {
                 results.discord = {
                     success: true,
