@@ -3,35 +3,65 @@
 * send anything to your IM realtime as log.
   * if u like u can add it to anywhere not just as log
   * one line send to All IM(Telegram, Discord, LINE, imgur)
+* https://www.npmjs.com/package/log2im
 * tool from https://decade.tw
 
 ### Usage
-
+```shell
+npm install log2im
+```
 ```javascript
 const {Log2im} = require("log2im/log2im.js");
-
-const log2IM_Config = {
-    text:`wahaha@${Date.now()}`,
-    images:{
-      url:'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
-      filepath: '/Users/x/Pictures/D.png', //imageOption1
-      base64: base64Example //imageOption2
-    },
-    line: {token: ''},
-    telegram: {token: 'must need', chatid: 'must need'},
-    discord: {token: 'must need', chatid: 'must need',clientid:'option need'},
-    //https://discord.com/oauth2/authorize?client_id=xxxxxxxxxxxx&permissions=51200&integration_type=0&scope=bot
-    //permission need 51200(attachment image)  2048(only text)
-    imgur: {token: ''}
+// Run the tests
+try {
+    const log2IM = new Log2im(log2IM_Config);//use above obj
+    const log2IM = new Log2im();//use .env
     
-    const log2IM = new Log2im();
-    log2IM_Config.text='init solar proxy'
-    log2IM.sendToAll(log2IM_Config).then(r => {
-        console.log("[DECADE.TW][log2im][ok]")
-    })
+    log2IM.sendToDiscord({text:'send2discord',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
+    log2IM.sendToTelegram({text:'send2telegram',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
+    log2IM.sendToIMGUR({text:'imgur_title',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
+    log2IM.sendToLineMessaging({text:'send2line'}).then((r)=>{log2IM.history()})
+    
+    const results = log2IM.sendToAll(log2IM_Config);
+} catch (error) {
+    console.error('Error in testSendToAllLineNotify:', error.message);
 }
 ```
 
+### Method1 - Config use obj
+```javascript
+
+const log2IM_Config = {
+    text:`wahaha@${Date.now()}`,
+    image_url:'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
+    image_file: '/Users/x/Pictures/D.png',
+
+    line: {token: 'must_need'},
+    telegram: {token: 'must_need', chatid: 'must_need'},
+    discord: {token: 'must_need', chatid: 'must_need',clientid:'must_need'},
+    imgur: {token: 'must_need',albumid:'get from url, set if u want img into album',
+        clientid:'no need after token get',
+        clientsecret:'no need after token get'} //chatid is imgur album name
+}
+```
+### Method2 - Config use .env
+```shell
+.env
+
+line_token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+telegram_token= xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+telegram_chatid= 1967680189
+
+discord_token= xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+discord_chatid=1332432695237673052
+discord_clientid=1400502410769858632
+
+imgur_token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+imgur_albumid=get from url, set if u want img into album
+imgur_clientid=no need after token get
+imgur_clientsecret=no need after token get
+```
 ## IMs Support
 <table style="border-width:0px">
 

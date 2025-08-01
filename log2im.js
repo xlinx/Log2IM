@@ -4,7 +4,6 @@ import fs from 'fs';
 import path from 'path';
 import {readFile} from 'node:fs/promises';
 
-
 // Utility functions
 const trimString = (s, limit, ellipsis = '…') => {
     s = (s || '').trim();
@@ -71,23 +70,68 @@ const readtoBase64 = async (filepath) => {
         throw new Error(`Failed to read file as base64: ${error.message}`);
     }
 };
-// const readImg2B64 = async form =>{
-//     var files = form.files;
-//     if (files.length === 0)
-//         return;
-//     let data = await resizeImage(window.URL.createObjectURL(files[0]))
-//     document.querySelector('#img').src = data;
-//     return  data.split(",")[1] // get only base64
-//     // sendMessage(b64toBlob(b64), { content: 'Resized Image'})
-// }
-// Message Sending Functions
+function loadEnvFile(filePath) {
+    try {
+        const resolvedPath = path.resolve(filePath);
+        const data = fs.readFileSync(resolvedPath, 'utf-8');
+        data.split(/\r?\n/).forEach((line) => {
+            const trimmedLine = line.trim();
+            if (!trimmedLine || trimmedLine.startsWith('#')) return; // Skip empty lines and comments
+            const [key, value] = trimmedLine.split('=');
+            if (key && value !== undefined) {
+                process.env[key.trim()] = value.trim();
+                console.log(`[ENV][LOAD]${key}=${value}`);
+            }
+        });
+        console.log('[][DECADE.TW] Environment variables loaded successfully.');
+    } catch (error) {
+        console.error(`[][DECADE.TW]Error loading .env file: ${error.message}`);
+    }
+}
 export class Log2im {
-    constructor() {
+
+    log2IM_Config = {
+        text:`wahaha@${Date.now()}`,
+        image_url:'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
+        image_file: '/Users/x/Pictures/D.png',
+
+        line: {token: 'must_need'},
+        telegram: {token: 'must_need', chatid: 'must_need'},
+        discord: {token: 'must_need', chatid: 'must_need',clientid:'must_need'},
+        imgur: {token: 'must_need',albumid:'get from url, set if u want img into album',
+            clientid:'no need after token get',
+            clientsecret:'no need after token get'} //chatid is imgur album name
+    }
+    constructor(log2IM_Config) {
         this.lineNotifyHistory = [];
         this.telegramBotHistory = [];
         this.discordBotHistory = [];
-    }
+        this.imgurBotHistory = [];
+        if(log2IM_Config){
+            this.log2IM_Config=log2IM_Config
+        }else{
+            loadEnvFile('.env');
+            this.log2IM_Config.discord.token=process.env.discord_token
+            this.log2IM_Config.discord.chatid=process.env.discord_chatid
+            this.log2IM_Config.discord.clientid=process.env.discord_clientid
 
+            this.log2IM_Config.telegram.token=process.env.telegram_token
+            this.log2IM_Config.telegram.chatid=process.env.telegram_chatid
+
+            this.log2IM_Config.imgur.token=process.env.imgur_token
+            this.log2IM_Config.imgur.clientid=process.env.imgur_clientid
+            this.log2IM_Config.imgur.clientsecret=process.env.imgur_clientsecret
+        }
+        console.log('[init][log2im][log2IM_Config]',this.log2IM_Config);
+    }
+    history(){
+        console.log('==========history')
+        this.lineNotifyHistory.forEach(e=>{console.log(e)})
+        this.telegramBotHistory.forEach(e=>{console.log(e)})
+        this.discordBotHistory.forEach(e=>{console.log(e)})
+        this.imgurBotHistory.forEach(e=>{console.log(e)})
+        console.log('==========history')
+    }
     /**
      * Send message to LINE Notify
      * @param {string} message - Message to send
@@ -95,7 +139,7 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from LINE Notify API
      */
-    async sendToLineNotify(message, token, imagePath = null) {
+    async sendToLineNotify(message, token=this.log2IM_Config.line.token, image_file) {
         const url = 'https://notify-api.line.me/api/notify';
         const headers = {'Authorization': `Bearer ${token}`};
 
@@ -164,7 +208,7 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from LINE Messaging API
      */
-    async sendToLineMessaging(message, channelAccessToken, to, imagePath = null) {
+    async sendToLineMessaging(message, channelAccessToken=this.log2IM_Config.line.token, to, imagePath ) {
         const url = 'https://api.line.me/v2/bot/message/push';
         const headers = {
             'Authorization': `Bearer ${channelAccessToken}`,
@@ -241,7 +285,6 @@ export class Log2im {
             throw error;
         }
     }
-
     async getChatID_Telegram(token) {
         const url = `https://api.telegram.org/bot${token}/getUpdates`;
         try {
@@ -250,6 +293,7 @@ export class Log2im {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json(); // Parse the JSON response
+
             const chatid = data['result'][0]['message']['chat']['id']
             console.log('[][][getChatID_Telegram]chatid=', chatid, JSON.stringify(data)); // Log the entire response for inspection
             return chatid; // Return the parsed JSON
@@ -257,10 +301,7 @@ export class Log2im {
             console.error('Error getting Telegram updates:', error);
             throw error;
         }
-
-
     }
-
     /**
      * Send message to Telegram
      * @param {string} message - Message to send
@@ -269,14 +310,12 @@ export class Log2im {
      * @param {string} images - Path to image file (optional)
      * @returns {Promise<object>} Response from Telegram API
      */
-    async sendToTelegram({text, images, token, chatid}) {
+    async sendToTelegram({text, image_url,image_file, token=this.log2IM_Config.telegram.token, chatid=this.log2IM_Config.telegram.chatid}) {
         // console.log('[][][sendToTelegram]text=',text,images, token, chatid)
         try {
-            if (chatid || chatid.length < 1)
+            if ( chatid.length < 1)
                 chatid = await this.getChatID_Telegram(token)
             const baseUrl = `https://api.telegram.org/bot${token}`;
-
-
             let responseData = undefined;
             if (text) {
                 const url = baseUrl + '/sendMessage'
@@ -307,11 +346,11 @@ export class Log2im {
                     throw error;
                 }
             }
-            if (images.filepath) {
+            if (image_file) {
                 const url = baseUrl + '/sendPhoto'
-                console.log(`[][T][sendPhoto] images.filepath=${images.filepath} chatid=${chatid} url=${url}`)
+                console.log(`[][T][sendPhoto] image_file=${image_file} chatid=${chatid} url=${url}`)
                 try {
-                    const imageBuffer = await readFile(images.filepath);
+                    const imageBuffer = await readFile(image_file);
                     const imageBlob = new Blob([imageBuffer], {type: 'image/jpeg'}); // Adjust MIME type as needed
                     const formData = new FormData();
                     formData.append('chat_id', chatid)
@@ -363,7 +402,7 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from Discord API
      */
-    async sendToDiscord({text, images, token, chatid, clientid}) {
+    async sendToDiscord({text, image_file, token=this.log2IM_Config.discord.token, chatid=this.log2IM_Config.discord.chatid, clientid=this.log2IM_Config.discord.clientid}) {
         try {
             console.log('[Discord]', text, token, chatid, clientid)
 
@@ -373,8 +412,6 @@ export class Log2im {
                 console.log('[Discord][chatid][ get chatid from desktop app(right click channel then copy it)]')
 
             const baseUrl = `https://discord.com/api/v10/channels/${chatid}/messages`;
-
-
             let responseData = undefined;
             if (text) {
                 const url = baseUrl
@@ -405,10 +442,10 @@ export class Log2im {
                     throw error;
                 }
             }
-            if (images.filepath) {
+            if (image_file) {
                 const url = baseUrl
-                console.log(`[][][Discord] images=${images.filepath} chatid=${chatid} url=${url}`)
-                const filename = path.basename(images.filepath)
+                console.log(`[][][Discord] images=${image_file} chatid=${chatid} url=${url}`)
+                const filename = path.basename(image_file)
                 const emb = {
                     // id: 0,filename: filename,
                     // title: filename,description: filename,
@@ -429,7 +466,7 @@ export class Log2im {
                 }
                 try {
 
-                    const screenShotBase64=await readtoBase64(images.filepath)
+                    const screenShotBase64=await readtoBase64(image_file)
                     // console.log('screenShotBase64',screenShotBase64)
                     const imageBlob =  b64toBlob2(screenShotBase64)
                     // console.log('imageBlob',imageBlob)
@@ -459,7 +496,7 @@ export class Log2im {
                     }).then(res => {
                         return res.json()
                     }).then(res => {
-                        this.telegramBotHistory.push({
+                        this.discordBotHistory.push({
                             timestamp: new Date().toISOString(),
                             status: 'success',
                             message: 'Photo sent to Discord',
@@ -499,7 +536,7 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from Discord API
      */
-    async sendToIMGUR({text, images, token, albumid=''}) {
+    async sendToIMGUR({text, image_file, token=this.log2IM_Config.imgur.token, albumid=this.log2IM_Config.imgur.albumid}) {
         try {
             console.log('[IMGUR]', text, token, albumid)
 
@@ -508,14 +545,14 @@ export class Log2im {
 
             let responseData = undefined;
 
-            if (images.filepath) {
+            if (image_file) {
                 const url = baseUrl
-                console.log(`[][][IMGUR] images=${images.filepath} albumid=${albumid} url=${url}`)
-                const filename = path.basename(images.filepath)
+                console.log(`[][][IMGUR] images=${image_file} albumid=${albumid} url=${url}`)
+                const filename = path.basename(image_file)
 
                 try {
 
-                    const imgBase64=await readtoBase64(images.filepath)
+                    const imgBase64=await readtoBase64(image_file)
                     const imageBlob =  b64toBlob2(imgBase64)
 
                     // console.log('screenShotBase64',screenShotBase64)
@@ -548,7 +585,7 @@ export class Log2im {
                     }).then(res => {
                         return res.json()
                     }).then(res => {
-                        this.telegramBotHistory.push({
+                        this.imgurBotHistory.push({
                             timestamp: new Date().toISOString(),
                             status: 'success',
                             message: 'Photo sent to Discord',
@@ -584,7 +621,7 @@ export class Log2im {
      * @param {Object} options - Configuration options
 
      */
-    async sendToAll({line,imgur, telegram, discord, text, images}) {
+    async sendToAll({line=this.log2IM_Config.line,imgur=this.log2IM_Config.imgur, telegram=this.log2IM_Config.telegram, discord=this.log2IM_Config.discord, text, images}) {
         const results = {
             line: {success: false},
             telegram: {success: false},
@@ -592,7 +629,6 @@ export class Log2im {
         };
         // Send to Discord if configured
         if (discord.token) {
-
             try {
                 results.discord = {
                     success: true,
