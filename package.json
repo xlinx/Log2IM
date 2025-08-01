@@ -1,0 +1,26 @@
+{
+  "name": "log2im",
+  "version": "1.0.117",
+  "description": "log anything into IM(Telgram, Discord, LineBot)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xlinx/Log2IM.git"
+  },
+  "keywords": [
+    "log",
+    "Telgram",
+    "Discord",
+    "LineBot",
+    "imgur"
+  ],
+  "author": "decade.tw",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xlinx/Log2IM/issues"
+  },
+  "homepage": "https://github.com/xlinx/Log2IM#readme"
+}
