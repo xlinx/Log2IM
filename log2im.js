@@ -491,13 +491,100 @@ export class Log2im {
         }
     }
 
+    /**
+     * Send message to IMGUR webhook
+     * @param {string} message - Message to send
+     * @param {string} webhookUrl - Discord webhook URL
+     * @param {string} username - Custom username for the webhook
+     * @param {string} imagePath - Path to image file (optional)
+     * @returns {Promise<object>} Response from Discord API
+     */
+    async sendToIMGUR({text, images, token, albumid=''}) {
+        try {
+            console.log('[IMGUR]', text, token, albumid)
 
+            const baseUrl = `https://api.imgur.com/3/upload`;
+
+
+            let responseData = undefined;
+
+            if (images.filepath) {
+                const url = baseUrl
+                console.log(`[][][IMGUR] images=${images.filepath} albumid=${albumid} url=${url}`)
+                const filename = path.basename(images.filepath)
+
+                try {
+
+                    const imgBase64=await readtoBase64(images.filepath)
+                    const imageBlob =  b64toBlob2(imgBase64)
+
+                    // console.log('screenShotBase64',screenShotBase64)
+
+                    let formData = new FormData();
+                    formData.append('image','data:image/png;base64,'+imgBase64)
+                    formData.append('type','base64')
+                    formData.append('name',filename+'_'+Date.now())
+                    formData.append('title',text+'_'+Date.now())
+                    if(albumid.length>0&&albumid.indexOf(' ')<=0)
+                        formData.append('album',albumid)
+                    // const bodyx={
+                    //     image:imgBase64,
+                    //     album:chatid,
+                    //     type:'base64',
+                    //     name:filename+'_'+Date.now(),
+                    //     title:text+'_'+Date.now()
+                    // }
+                    console.log('formData',(formData))
+                    await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            "Authorization": 'f"Bearer ' + token,
+                            // 'Authorization': 'Client-ID ' + clientid,
+                            'Content-Type': 'multipart/form-data'
+                            // "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"
+                        },
+                        body: formData,
+
+                    }).then(res => {
+                        return res.json()
+                    }).then(res => {
+                        this.telegramBotHistory.push({
+                            timestamp: new Date().toISOString(),
+                            status: 'success',
+                            message: 'Photo sent to Discord',
+                            response: res
+                        });
+                        console.log('[][IMGUR][sendPhoto]res', res)
+                        return res
+                    });
+
+                } catch (error) {
+                    console.error('Error getting IMGUR updates:', error);
+                    throw error;
+                }
+            }
+
+
+            return responseData;
+        } catch (error) {
+            console.error('Error sending to IMGUR:', error);
+
+            this.telegramBotHistory.push({
+                timestamp: new Date().toISOString(),
+                status: 'error',
+                message: 'Failed to send to IMGUR',
+                error: error.message
+            });
+
+            throw error;
+        }
+    }
     /**
      * Send message to all configured services
      * @param {Object} options - Configuration options
 
      */
-    async sendToAll({line, telegram, discord, text, images}) {
+    async sendToAll({line,imgur, telegram, discord, text, images}) {
         const results = {
             line: {success: false},
             telegram: {success: false},
@@ -524,20 +611,34 @@ export class Log2im {
                 };
             }
         }
-        // Send to Telegram if configured
-        // if (telegram.token ) {
-        //     try {
-        //         results.telegram = {
-        //             success: true,
-        //             response: await this.sendToTelegram({text:text, images:images, token:telegram.token,chatid:telegram.chatid})
-        //         };
-        //     } catch (error) {
-        //         results.telegram = {
-        //             success: false,
-        //             error: error.message
-        //         };
-        //     }
-        // }
+       // Send to Telegram if configured
+        if (telegram.token ) {
+            try {
+                results.telegram = {
+                    success: true,
+                    response: await this.sendToTelegram({text:text, images:images, token:telegram.token,chatid:telegram.chatid})
+                };
+            } catch (error) {
+                results.telegram = {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+        if (imgur.token ) {
+            try {
+                results.telegram = {
+                    success: true,
+                    response: await this.sendToIMGUR({text:text, images:images, token:imgur.token,albumid:imgur.albumid})
+                };
+            } catch (error) {
+                results.telegram = {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
         // // Send to LINE Messaging API if configured
         // if (line.token ) {
         //     try {

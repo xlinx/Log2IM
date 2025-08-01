@@ -1,7 +1,9 @@
-# Log2IM (node version)
+# Log2IM (Telegram, Discord, LINE, imgur)
 * small. use native node lib, no other needs.
 * send anything to your IM realtime as log.
-* https://decade.tw
+  * if u like u can add it to anywhere not just as log
+  * one line send to All IM(Telegram, Discord, LINE, imgur)
+* tool from https://decade.tw
 
 ### Usage
 
@@ -16,8 +18,10 @@ const log2IM_Config = {
       base64: base64Example //imageOption2
     },
     line: {token: ''},
-    telegram: {token: '11111:xxxxxxxxxxxxxxxxxxxxxx', chatid: '1967680189'},
-    discord: {token: '', chatid: ''},
+    telegram: {token: 'must need', chatid: 'must need'},
+    discord: {token: 'must need', chatid: 'must need',clientid:'option need'},
+    //https://discord.com/oauth2/authorize?client_id=xxxxxxxxxxxx&permissions=51200&integration_type=0&scope=bot
+    //permission need 51200(attachment image)  2048(only text)
     imgur: {token: ''}
     
     const log2IM = new Log2im();
@@ -28,33 +32,39 @@ const log2IM_Config = {
 }
 ```
 
-## IMs Support 
+## IMs Support
 <table style="border-width:0px">
 
  <tr>
-    <td><b style="font-size:20px">LINE-Bot-MsgAPI</b>
-    <li><a href="https://developers.line.biz/zh-hant/services/messaging-api/">link</a></li></td>
+    <td><b style="font-size:20px">LINE-Bot-MsgAPI [🟠bug fixing]</b>
+    <li>add bot first- <a href="https://developers.line.biz/zh-hant/services/messaging-api/">link</a></li><li>later version porting...</li></td>
     <td><img width="100px" src="https://developers.line.biz/assets/img/products/messaging-api/p1.svg"></td>
  </tr>
 
  <tr>
-    <td><b style="font-size:20px">Telegram - Bot</b><li><a href="https://core.telegram.org/api">link</a></li></td>
+    <td><b style="font-size:20px">Telegram - Bot [🟢ready to use]</b><li>add bot first- <a href="https://core.telegram.org/api">link</a></li><li>no-need server(if just send text&img to IM)</li><li>control node from IM (need cloud server. like AWS lambda)</li><li>text & image support</li></td>
     <td><img width="100px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png"></td>
+
  </tr>
  <tr>
-    <td><b style="font-size:20px">Discord - Bot</b><li><a href="https://discord.com/developers/applications">link</a></li></td>
+    <td><b style="font-size:20px">Discord - Bot [🟢ready to use]</b><li>add bot first- <a href="https://discord.com/developers/applications">link</a></li><li>no-need server(if just send text&img to IM)</li><li>control node from IM (need cloud server. like AWS lambda)</li><li>text & image support</li></td>
     <td><img width="100px" src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0b5061df29d55a92d945_full_logo_blurple_RGB.svg"></td>
  </tr>
  <tr>
-    <td><b style="font-size:20px">imgur - FreePic</b> 
-        <li><a href="https://imgur.com/account/settings/apps">link</a></li>
-        <li>Upload limits</li>
-        <li>There is an upload limit of 50 images per hour. </li>
-        <li>There is no upload limit per account, so upload to your heart's desire!</li> </td>
+    <td><b style="font-size:20px">imgur - FreePic [🟢ready to use]</b> 
+        <li>add app first- <a href="https://imgur.com/account/settings/apps">link</a></li>
+        <li> use Client ID、Client Secret to get token</li>
+        <li> If you already have the id and secret, just login with your browser and then on another tab</li> 
+        <li>enter this URL (replace CLIENT_ID)
+        <li>https://api.imgur.com/oauth2/authorize?client_id=CLIENT_ID&response_type=token</li>
+        <li>Accept, and from the resulting URL you need to extract the desired tokens</li>
+        <li>other tutorial - <a href="https://rapidapi.com/blog/imgur-api-tutorial/">link</a></li>
+        <li>Upload limits: unlimited, but 50 images per hour. </li>
+         </td>
     <td><img width="100px" src="https://s.imgur.com/images/imgur-logo.svg"></td>
  </tr>
  <tr>
-    <td><strike style="font-size:20px">LINE-Notify(official stop service @2025/04)</strike>
+    <td><strike style="font-size:20px">LINE-Notify(🔴official stop service @2025/04)</strike>
     <li>LY crop. official stop service @2025/04</li>
     <li>using 2.LINE-Bot-Messaging API replace Notify services</li></td>
     <td><b style="font-size:20px"><img width="100px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/LINE_logo.svg/320px-LINE_logo.svg.png"></td>
