@@ -1,10 +1,12 @@
 {
   "name": "log2im",
-  "version": "1.0.118",
+  "version": "1.0.120",
   "description": "log anything into IM(Telgram, Discord, LineBot)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm build log2im.js",
+    "mini": "uglifyjs log2im.js -m -c -o log2im.min.js"
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/xlinx/Log2IM/issues"
   },
-  "homepage": "https://github.com/xlinx/Log2IM#readme"
+  "homepage": "https://github.com/xlinx/Log2IM#readme",
+  "devDependencies": {
+    "uglify-js": "^3.19.3"
+  }
 }

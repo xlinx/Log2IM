@@ -1,4 +1,4 @@
-# Log2IM (Telegram, Discord, LINE, imgur)
+# Log2IM (Telegram, Discord, LINE, imgur, Notion)
 * small. use native node lib, no other needs.
 * send anything to your IM realtime as log.
   * if u like u can add it to anywhere not just as log
@@ -14,13 +14,24 @@ npm install log2im
 const {Log2im} = require("log2im/log2im.js");
 // Run the tests
 try {
-    const log2IM = new Log2im(log2IM_Config);//use above obj
-    const log2IM = new Log2im();//use .env
+    // Option 1: Use config object
+    // const log2IM = new Log2im(log2IM_Config);
+    
+    // Option 2: Use .env file
+    const log2IM = new Log2im();
     
     log2IM.sendToDiscord({text:'send2discord',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
     log2IM.sendToTelegram({text:'send2telegram',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
     log2IM.sendToIMGUR({text:'imgur_title',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
     log2IM.sendToLineMessaging({text:'send2line'}).then((r)=>{log2IM.history()})
+    
+    // Send to Notion with an image file
+    log2IM.sendToNotion({
+        text: 'Test Notion message', 
+        image_file: '/Users/x/Pictures/D.png'
+    }).then((r) => {
+        console.log('Notion response:', r);
+    });
     
     const results = log2IM.sendToAll(log2IM_Config);
 } catch (error) {
@@ -61,10 +72,25 @@ imgur_token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 imgur_albumid=get from url, set if u want img into album
 imgur_clientid=no need after token get
 imgur_clientsecret=no need after token get
+
+notion_token= ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+notion_chatid=243df44366a8802aaa9bd2ed6ef2f543
+
 ```
+
 ## IMs Support
 <table style="border-width:0px">
-
+<tr>
+    <td><b style="font-size:20px">Notion API [🟢ready to use]</b>
+        <li>Create a Notion integration first - <a href="https://www.notion.so/my-integrations">link</a></li>
+        <li>Get your integration token and add it to your .env file as NOTION_TOKEN</li>
+        <li>You can use either a Notion page ID or database ID:</li>
+        <li>get from notion url on your page link</li>
+        <li>Example: 1429989fe8ac4effbc8f57f56486db54</li>
+        <li>Note: Images are handled by reference only - they need to be hosted elsewhere</li>
+    </td>
+    <td><svg width="29" height="30" viewBox="0 0 29 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.81 1.294L18.446.068c2.043-.175 2.568-.057 3.852.875l5.311 3.733c.877.642 1.169.817 1.169 1.516v20.473c0 1.283-.468 2.042-2.102 2.158L7.357 29.99c-1.228.058-1.811-.117-2.454-.934l-3.91-5.074C.29 23.048 0 22.349 0 21.532V3.334c0-1.049.468-1.924 1.81-2.04z" fill="#fff"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M18.447.068L1.808 1.294C.468 1.41 0 2.285 0 3.334v18.198c0 .817.291 1.516.992 2.45l3.911 5.074c.643.817 1.226.992 2.453.934l19.321-1.167c1.634-.116 2.102-.875 2.102-2.158V6.192c0-.663-.263-.854-1.037-1.42l-.132-.096L22.3.943c-1.285-.932-1.81-1.05-3.854-.875zM7.793 5.857c-1.577.106-1.936.13-2.831-.597L2.685 3.452c-.233-.234-.116-.526.467-.584l15.995-1.166c1.342-.117 2.043.35 2.568.758l2.744 1.983c.117.059.408.408.058.408l-16.52.992-.203.014zM5.954 26.49V9.11c0-.759.234-1.109.934-1.168l18.971-1.108c.643-.058.935.35.935 1.108v17.264c0 .759-.117 1.401-1.168 1.459l-18.154 1.05c-1.05.058-1.518-.291-1.518-1.225zm17.922-16.448c.116.525 0 1.05-.527 1.11l-.874.173v12.832c-.76.408-1.46.641-2.044.641-.934 0-1.168-.292-1.868-1.166l-5.721-8.982v8.69l1.81.409s0 1.05-1.46 1.05l-4.027.233c-.117-.234 0-.817.408-.933l1.051-.291v-11.49L9.165 12.2c-.117-.525.174-1.283.992-1.341l4.32-.292 5.954 9.1v-8.05l-1.518-.174c-.116-.643.35-1.109.934-1.167l4.029-.234z" fill="#000"></path></svg></td>
+ </tr>
  <tr>
     <td><b style="font-size:20px">LINE-Bot-MsgAPI [🟠bug fixing]</b>
     <li>add bot first- <a href="https://developers.line.biz/zh-hant/services/messaging-api/">link</a></li><li>later version porting...</li></td>
@@ -97,7 +123,16 @@ imgur_clientsecret=no need after token get
     <td><strike style="font-size:20px">LINE-Notify(🔴official stop service @2025/04)</strike>
     <li>LY crop. official stop service @2025/04</li>
     <li>using 2.LINE-Bot-Messaging API replace Notify services</li></td>
-    <td><b style="font-size:20px"><img width="100px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/LINE_logo.svg/320px-LINE_logo.svg.png"></td>
+    <td><img width="100px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/LINE_logo.svg/320px-LINE_logo.svg.png"></td>
+ </tr>
+ <tr>
+    <td><b style="font-size:20px">Notion [🟢ready to use]</b>
+    <li>Create a Notion integration - <a href="https://www.notion.so/my-integrations">link</a></li>
+    <li>Set NOTION_TOKEN in your .env file</li>
+    <li>Send messages with image files to your Notion workspace</li>
+    <li>Images are uploaded and added both to new pages and appended to existing pages</li>
+    <li>Supports both database entries and direct page updates</li></td>
+    <td><img width="100px" src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png"></td>
  </tr>
 </table>
 
@@ -106,6 +141,7 @@ imgur_clientsecret=no need after token get
 * ~~Line-Bot-Messaging-API:~~ ❓[API access-token-ID] ❓[cloud-server] ~60min
 * Telegram-bot: ❓[bot-token] ❓[chat-id] ~10min
 * Discord: ❓[User]/❓[Server|Guild]/❓[Message] ID ~15min
+* Notion: ❓[NOTION_TOKEN] ~5min
 
 #### LINE
 * ⬇️LINE Notify (basic usage, receive from web-ui)

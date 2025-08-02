@@ -41,13 +41,13 @@ const blobToBase64 = (blob) => new Promise((resolve, reject) => {
     };
     reader.readAsDataURL(blob);
 });
-const b64toBlob = (base64Data) => new Promise(  (resolve, reject) => {
-    const base64Response =  fetch(`data:image/jpeg;base64,${base64Data}`).then((response) => response.blob()).then((myBlob) => {
+const b64toBlob = (base64Data) => new Promise((resolve, reject) => {
+    const base64Response = fetch(`data:image/jpeg;base64,${base64Data}`).then((response) => response.blob()).then((myBlob) => {
         return myBlob
     });
 
 });
-const b64toBlob2 = (b64Data, contentType='image/jpeg', sliceSize=512) => {
+const b64toBlob2 = (b64Data, contentType = 'image/jpeg', sliceSize = 512) => {
     const byteCharacters = atob(b64Data);
     const byteArrays = [];
     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
@@ -70,6 +70,7 @@ const readtoBase64 = async (filepath) => {
         throw new Error(`Failed to read file as base64: ${error.message}`);
     }
 };
+
 function loadEnvFile(filePath) {
     try {
         const resolvedPath = path.resolve(filePath);
@@ -88,50 +89,68 @@ function loadEnvFile(filePath) {
         console.error(`[][DECADE.TW]Error loading .env file: ${error.message}`);
     }
 }
+
 export class Log2im {
 
     log2IM_Config = {
-        text:`wahaha@${Date.now()}`,
-        image_url:'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
+        text: `wahaha@${Date.now()}`,
+        image_url: 'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
         image_file: '/Users/x/Pictures/D.png',
 
         line: {token: 'must_need'},
+        notion: {token: 'must_need', chatid: 'must_need'},
         telegram: {token: 'must_need', chatid: 'must_need'},
-        discord: {token: 'must_need', chatid: 'must_need',clientid:'must_need'},
-        imgur: {token: 'must_need',albumid:'get from url, set if u want img into album',
-            clientid:'no need after token get',
-            clientsecret:'no need after token get'} //chatid is imgur album name
+        discord: {token: 'must_need', chatid: 'must_need', clientid: 'must_need'},
+        imgur: {
+            token: 'must_need', albumid: 'get from url, set if u want img into album',
+            clientid: 'no need after token get',
+            clientsecret: 'no need after token get'
+        } //chatid is imgur album name
     }
+
     constructor(log2IM_Config) {
         this.lineNotifyHistory = [];
         this.telegramBotHistory = [];
         this.discordBotHistory = [];
         this.imgurBotHistory = [];
-        if(log2IM_Config){
-            this.log2IM_Config=log2IM_Config
-        }else{
+        if (log2IM_Config) {
+            this.log2IM_Config = log2IM_Config
+        } else {
             loadEnvFile('.env');
-            this.log2IM_Config.discord.token=process.env.discord_token
-            this.log2IM_Config.discord.chatid=process.env.discord_chatid
-            this.log2IM_Config.discord.clientid=process.env.discord_clientid
+            this.log2IM_Config.discord.token = process.env.discord_token
+            this.log2IM_Config.discord.chatid = process.env.discord_chatid
+            this.log2IM_Config.discord.clientid = process.env.discord_clientid
 
-            this.log2IM_Config.telegram.token=process.env.telegram_token
-            this.log2IM_Config.telegram.chatid=process.env.telegram_chatid
+            this.log2IM_Config.telegram.token = process.env.telegram_token
+            this.log2IM_Config.telegram.chatid = process.env.telegram_chatid
 
-            this.log2IM_Config.imgur.token=process.env.imgur_token
-            this.log2IM_Config.imgur.clientid=process.env.imgur_clientid
-            this.log2IM_Config.imgur.clientsecret=process.env.imgur_clientsecret
+            this.log2IM_Config.notion.token = process.env.notion_token
+            this.log2IM_Config.notion.chatid = process.env.notion_chatid
+
+            this.log2IM_Config.imgur.token = process.env.imgur_token
+            this.log2IM_Config.imgur.clientid = process.env.imgur_clientid
+            this.log2IM_Config.imgur.clientsecret = process.env.imgur_clientsecret
         }
-        console.log('[init][log2im][log2IM_Config]',this.log2IM_Config);
+        console.log('[init][log2im][log2IM_Config]', this.log2IM_Config);
     }
-    history(){
+
+    history() {
         console.log('==========history')
-        this.lineNotifyHistory.forEach(e=>{console.log(e)})
-        this.telegramBotHistory.forEach(e=>{console.log(e)})
-        this.discordBotHistory.forEach(e=>{console.log(e)})
-        this.imgurBotHistory.forEach(e=>{console.log(e)})
+        this.lineNotifyHistory.forEach(e => {
+            console.log(e)
+        })
+        this.telegramBotHistory.forEach(e => {
+            console.log(e)
+        })
+        this.discordBotHistory.forEach(e => {
+            console.log(e)
+        })
+        this.imgurBotHistory.forEach(e => {
+            console.log(e)
+        })
         console.log('==========history')
     }
+
     /**
      * Send message to LINE Notify
      * @param {string} message - Message to send
@@ -139,7 +158,7 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from LINE Notify API
      */
-    async sendToLineNotify(message, token=this.log2IM_Config.line.token, image_file) {
+    async sendToLineNotify(message, token = this.log2IM_Config.line.token, image_file) {
         const url = 'https://notify-api.line.me/api/notify';
         const headers = {'Authorization': `Bearer ${token}`};
 
@@ -208,7 +227,7 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from LINE Messaging API
      */
-    async sendToLineMessaging(message, channelAccessToken=this.log2IM_Config.line.token, to, imagePath ) {
+    async sendToLineMessaging(message, channelAccessToken = this.log2IM_Config.line.token, to, imagePath) {
         const url = 'https://api.line.me/v2/bot/message/push';
         const headers = {
             'Authorization': `Bearer ${channelAccessToken}`,
@@ -285,6 +304,7 @@ export class Log2im {
             throw error;
         }
     }
+
     async getChatID_Telegram(token) {
         const url = `https://api.telegram.org/bot${token}/getUpdates`;
         try {
@@ -302,6 +322,7 @@ export class Log2im {
             throw error;
         }
     }
+
     /**
      * Send message to Telegram
      * @param {string} message - Message to send
@@ -310,10 +331,16 @@ export class Log2im {
      * @param {string} images - Path to image file (optional)
      * @returns {Promise<object>} Response from Telegram API
      */
-    async sendToTelegram({text, image_url,image_file, token=this.log2IM_Config.telegram.token, chatid=this.log2IM_Config.telegram.chatid}) {
+    async sendToTelegram({
+                             text,
+                             image_url,
+                             image_file,
+                             token = this.log2IM_Config.telegram.token,
+                             chatid = this.log2IM_Config.telegram.chatid
+                         }) {
         // console.log('[][][sendToTelegram]text=',text,images, token, chatid)
         try {
-            if ( chatid.length < 1)
+            if (chatid.length < 1)
                 chatid = await this.getChatID_Telegram(token)
             const baseUrl = `https://api.telegram.org/bot${token}`;
             let responseData = undefined;
@@ -402,7 +429,13 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from Discord API
      */
-    async sendToDiscord({text, image_file, token=this.log2IM_Config.discord.token, chatid=this.log2IM_Config.discord.chatid, clientid=this.log2IM_Config.discord.clientid}) {
+    async sendToDiscord({
+                            text,
+                            image_file,
+                            token = this.log2IM_Config.discord.token,
+                            chatid = this.log2IM_Config.discord.chatid,
+                            clientid = this.log2IM_Config.discord.clientid
+                        }) {
         try {
             console.log('[Discord]', text, token, chatid, clientid)
 
@@ -419,7 +452,10 @@ export class Log2im {
                 try {
                     await fetch(url, {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json', "Authorization": 'Bot ' + token},
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Content-Type': 'application/json', "Authorization": 'Bot ' + token
+                        },
                         body: JSON.stringify({
                             tts: false,
                             content: '[text]' + text
@@ -459,19 +495,19 @@ export class Log2im {
                     },
                 }
                 const att = {
-                    id: 0,description: filename,filename: filename,
+                    id: 0, description: filename, filename: filename,
                 }
-                const messageRef={
+                const messageRef = {
                     message_id: "1400719999336710275"
                 }
                 try {
 
-                    const screenShotBase64=await readtoBase64(image_file)
+                    const screenShotBase64 = await readtoBase64(image_file)
                     // console.log('screenShotBase64',screenShotBase64)
-                    const imageBlob =  b64toBlob2(screenShotBase64)
+                    const imageBlob = b64toBlob2(screenShotBase64)
                     // console.log('imageBlob',imageBlob)
 
-                    const contentX={
+                    const contentX = {
                         content: '[att]' + text,
                         // embeds: JSON.stringify([emb]),
                         // message_reference: {
@@ -482,10 +518,10 @@ export class Log2im {
                     const filesObj = {}
                     filesObj[filename] = imageBlob
                     let formData = new FormData();
-                    formData.append('json',JSON.stringify(contentX))
-                    formData.append('files',imageBlob,filename)
+                    formData.append('json', JSON.stringify(contentX))
+                    formData.append('files', imageBlob, filename)
                     // formData.append('files',imageBlob)
-                    console.log('formData',(formData))
+                    console.log('formData', (formData))
                     await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -536,7 +572,12 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from Discord API
      */
-    async sendToIMGUR({text, image_file, token=this.log2IM_Config.imgur.token, albumid=this.log2IM_Config.imgur.albumid}) {
+    async sendToIMGUR({
+                          text,
+                          image_file,
+                          token = this.log2IM_Config.imgur.token,
+                          albumid = this.log2IM_Config.imgur.albumid
+                      }) {
         try {
             console.log('[IMGUR]', text, token, albumid)
 
@@ -552,18 +593,18 @@ export class Log2im {
 
                 try {
 
-                    const imgBase64=await readtoBase64(image_file)
-                    const imageBlob =  b64toBlob2(imgBase64)
+                    const imgBase64 = await readtoBase64(image_file)
+                    const imageBlob = b64toBlob2(imgBase64)
 
                     // console.log('screenShotBase64',screenShotBase64)
 
                     let formData = new FormData();
-                    formData.append('image','data:image/png;base64,'+imgBase64)
-                    formData.append('type','base64')
-                    formData.append('name',filename+'_'+Date.now())
-                    formData.append('title',text+'_'+Date.now())
-                    if(albumid.length>0&&albumid.indexOf(' ')<=0)
-                        formData.append('album',albumid)
+                    formData.append('image', 'data:image/png;base64,' + imgBase64)
+                    formData.append('type', 'base64')
+                    formData.append('name', filename + '_' + Date.now())
+                    formData.append('title', text + '_' + Date.now())
+                    if (albumid.length > 0 && albumid.indexOf(' ') <= 0)
+                        formData.append('album', albumid)
                     // const bodyx={
                     //     image:imgBase64,
                     //     album:chatid,
@@ -571,7 +612,7 @@ export class Log2im {
                     //     name:filename+'_'+Date.now(),
                     //     title:text+'_'+Date.now()
                     // }
-                    console.log('formData',(formData))
+                    console.log('formData', (formData))
                     await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -616,12 +657,296 @@ export class Log2im {
             throw error;
         }
     }
+
+    // Helper function to append a block to an existing Notion page
+    async appendBlockToNotionPage(pageId, block, token) {
+        try {
+            // Notion API endpoint for appending blocks to a page
+            const url = `https://api.notion.com/v1/blocks/${pageId}/children`;
+            
+            console.log(`[Notion] Appending block to page ${pageId}`);
+            
+            // Headers for the request
+            const headers = {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                "Notion-Version": "2022-06-28"
+            };
+            
+            // Create the request body with the block to append
+            const blockData = {
+                children: [block]
+            };
+            
+            // Send the request to Notion API
+            const response = await fetch(url, {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify(blockData)
+            });
+            
+            if (response.ok) {
+                console.log("Block successfully appended to existing page");
+                return true;
+            } else {
+                const errorData = await response.json();
+                console.error("Error appending block to page:", errorData);
+                return false;
+            }
+        } catch (error) {
+            console.error("Error in appendBlockToNotionPage:", error);
+            return false;
+        }
+    }
+
+    async sendToNotion({
+                       text,
+                       image_file,
+                       token = this.log2IM_Config.notion.token,
+                       chatid = this.log2IM_Config.notion.chatid
+                   }) {
+        // Authentication - Load API token from environment variables
+        if (!token) {
+            console.error("Notion API token not found in environment variables");
+            console.error("Please set NOTION_TOKEN in your .env file or provide it in the config object");
+            return false;
+        }
+
+        // Check if chatid is provided
+        if (!chatid) {
+            console.error("Notion page ID not provided");
+            console.error("Please set notion_chatid in your .env file or provide it in the config object");
+            console.error("You can find your page ID in the URL of your Notion page: https://www.notion.so/[workspace]/[page-id]");
+            return false;
+        }
+
+        // Notion API endpoint for appending blocks to a page
+        // Format the page ID to ensure it's in the correct format (8-4-4-4-12)
+        let formattedPageId = chatid;
+        if (chatid && !chatid.includes('-') && chatid.length === 32) {
+            formattedPageId = `${chatid.slice(0, 8)}-${chatid.slice(8, 12)}-${chatid.slice(12, 16)}-${chatid.slice(16, 20)}-${chatid.slice(20)}`;
+        }
+        
+        // Use the pages API endpoint to create a new page
+        const url = `https://api.notion.com/v1/pages`;
+        
+        console.log('[][][sendToNotion]url=', url);
+        
+        // Headers for the request
+        const headers = {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28"
+        };
+        
+        // Create a new page with content
+        let properties = {
+            title: {
+                title: [
+                    {
+                        text: {
+                            content: text || "Log2IM Message"
+                        }
+                    }
+                ]
+            }
+        };
+        
+        // Create the request body for creating a page
+        // We'll try database_id first, and if that fails, we'll try page_id
+        const blockData = {
+            parent: {
+                database_id: formattedPageId
+            },
+            properties: properties,
+            children: []
+        };
+        
+        // Add text block if provided
+        if (text) {
+            blockData.children.push({
+                object: "block",
+                type: "paragraph",
+                paragraph: {
+                    rich_text: [{ 
+                        type: "text", 
+                        text: { 
+                            content: text 
+                        } 
+                    }]
+                }
+            });
+        }
+        
+        // Add image block if provided
+        if (image_file) {
+            try {
+                // Step 1: Create a file upload object
+                console.log("Creating file upload object for Notion...");
+                const fileUploadResponse = await fetch("https://api.notion.com/v1/file_uploads", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        "Notion-Version": "2022-06-28"
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                if (!fileUploadResponse.ok) {
+                    const errorData = await fileUploadResponse.json();
+                    console.error("Error creating file upload:", errorData);
+                    throw new Error(`Failed to create file upload: ${fileUploadResponse.status}`);
+                }
+                
+                const fileUploadData = await fileUploadResponse.json();
+                console.log("File upload object created:", fileUploadData);
+                
+                // Step 2: Upload the file content
+                const fileBuffer = await readFile(image_file);
+                const fileName = path.basename(image_file);
+                const fileType = fileName.endsWith('.png') ? 'image/png' : 
+                                 fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg' : 
+                                 'application/octet-stream';
+                
+                console.log(`Uploading file ${fileName} to Notion...`);
+                // Create a FormData object for the file upload
+                const formData = new FormData();
+                const fileBlob = new Blob([fileBuffer], { type: fileType });
+                formData.append('file', fileBlob, fileName);
+                formData.append('part_number', '1');
+                
+                // Send the file using POST request
+                const uploadResponse = await fetch(fileUploadData.upload_url, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Notion-Version": "2022-06-28"
+                        // Don't set Content-Type header, it will be set automatically with the boundary
+                    },
+                    body: formData
+                });
+                
+                if (!uploadResponse.ok) {
+                    console.error("Error uploading file:", await uploadResponse.text());
+                    throw new Error(`Failed to upload file: ${uploadResponse.status}`);
+                }
+                
+                console.log("File uploaded successfully");
+                
+                // Step 3: Add the uploaded file to the page as an image block
+                blockData.children.push({
+                    object: "block",
+                    type: "image",
+                    image: {
+                        type: "file_upload",
+                        file_upload: {
+                            id: fileUploadData.id
+                        }
+                    }
+                });
+                
+                console.log("Image block added to page content");
+                
+                // Step 4: Also append the image to the existing page if it was created successfully
+                await this.appendBlockToNotionPage(formattedPageId, {
+                    object: "block",
+                    type: "image",
+                    image: {
+                        type: "file_upload",
+                        file_upload: {
+                            id: fileUploadData.id
+                        }
+                    }
+                }, token);
+                
+            } catch (error) {
+                console.error("Error handling image file for Notion:", error);
+                
+                // Fallback: Add a text block mentioning the image
+                blockData.children.push({
+                    object: "block",
+                    type: "paragraph",
+                    paragraph: {
+                        rich_text: [{ 
+                            type: "text", 
+                            text: { 
+                                content: "Failed to upload image: " + path.basename(image_file)
+                            } 
+                        }]
+                    }
+                });
+            }
+        }
+
+        // Send the request to Notion API - first try with database_id
+        try {
+            let response = await fetch(url, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(blockData)
+            });
+
+            // If database_id fails, try with page_id
+            if (!response.ok && response.status === 404) {
+                console.log("Database ID not found, trying as page_id instead");
+                
+                // Update the request body to use page_id instead
+                blockData.parent = {
+                    page_id: formattedPageId
+                };
+                
+                // Try again with page_id
+                response = await fetch(url, {
+                    method: "POST",
+                    headers: headers,
+                    body: JSON.stringify(blockData)
+                });
+            }
+
+            if (response.ok) {
+                console.log("Message sent to Notion successfully!");
+                return true;
+            } else {
+                const errorData = await response.json();
+                console.error("Notion API error:", errorData);
+                
+                // Provide more helpful error messages based on common issues
+                if (errorData.code === "object_not_found") {
+                    console.error("The specified page or block ID was not found.");
+                    console.error("Make sure the page exists and your integration has access to it.");
+                    console.error("You need to share the page with your integration in Notion.");
+                    console.error("Try creating a database in Notion and sharing it with your integration.");
+                } else if (errorData.code === "unauthorized") {
+                    console.error("Your integration doesn't have permission to access this page.");
+                    console.error("Make sure you've shared the page with your integration in Notion.");
+                } else if (errorData.code === "invalid_request_url") {
+                    console.error("The request URL is invalid. Check your page ID format.");
+                    console.error("Page ID should be in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx");
+                    console.error("Or without dashes: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+                }
+                
+                throw new Error(`Failed to send message to Notion: ${response.status}`);
+            }
+        } catch (error) {
+            console.error("Error sending message to Notion:", error);
+            return false;
+        }
+    }
+
     /**
      * Send message to all configured services
      * @param {Object} options - Configuration options
 
      */
-    async sendToAll({line=this.log2IM_Config.line,imgur=this.log2IM_Config.imgur, telegram=this.log2IM_Config.telegram, discord=this.log2IM_Config.discord, text, images}) {
+    async sendToAll({
+                        line = this.log2IM_Config.line,
+                        imgur = this.log2IM_Config.imgur,
+                        telegram = this.log2IM_Config.telegram,
+                        discord = this.log2IM_Config.discord,
+                        text,
+                        images
+                    }) {
         const results = {
             line: {success: false},
             telegram: {success: false},
@@ -647,12 +972,17 @@ export class Log2im {
                 };
             }
         }
-       // Send to Telegram if configured
-        if (telegram.token ) {
+        // Send to Telegram if configured
+        if (telegram.token) {
             try {
                 results.telegram = {
                     success: true,
-                    response: await this.sendToTelegram({text:text, images:images, token:telegram.token,chatid:telegram.chatid})
+                    response: await this.sendToTelegram({
+                        text: text,
+                        images: images,
+                        token: telegram.token,
+                        chatid: telegram.chatid
+                    })
                 };
             } catch (error) {
                 results.telegram = {
@@ -661,11 +991,16 @@ export class Log2im {
                 };
             }
         }
-        if (imgur.token ) {
+        if (imgur.token) {
             try {
                 results.telegram = {
                     success: true,
-                    response: await this.sendToIMGUR({text:text, images:images, token:imgur.token,albumid:imgur.albumid})
+                    response: await this.sendToIMGUR({
+                        text: text,
+                        images: images,
+                        token: imgur.token,
+                        albumid: imgur.albumid
+                    })
                 };
             } catch (error) {
                 results.telegram = {
