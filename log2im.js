@@ -81,7 +81,7 @@ function loadEnvFile(filePath) {
             const [key, value] = trimmedLine.split('=');
             if (key && value !== undefined) {
                 process.env[key.trim()] = value.trim();
-                console.log(`[ENV][LOAD]${key}=${value}`);
+                // console.log(`[ENV][LOAD]${key}=${value}`);
             }
         });
         console.log('[][DECADE.TW] Environment variables loaded successfully.');
@@ -92,31 +92,36 @@ function loadEnvFile(filePath) {
 
 export class Log2im {
 
-    log2IM_Config = {
-        text: `wahaha@${Date.now()}`,
-        image_url: 'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
-        image_file: '/Users/x/Pictures/D.png',
 
-        line: {token: 'must_need'},
-        notion: {token: 'must_need', chatid: 'must_need'},
-        telegram: {token: 'must_need', chatid: 'must_need'},
-        discord: {token: 'must_need', chatid: 'must_need', clientid: 'must_need'},
-        imgur: {
-            token: 'must_need', albumid: 'get from url, set if u want img into album',
-            clientid: 'no need after token get',
-            clientsecret: 'no need after token get'
-        } //chatid is imgur album name
-    }
 
     constructor(log2IM_Config) {
+        this.log2IM_Config = {
+            text: `wahaha@${Date.now()}`,
+            image_url: 'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
+            image_file: '/Users/x/Pictures/D.png',
+
+            line: {token: 'must_need'},
+            notion: {token: 'must_need', chatid: 'must_need'},
+            telegram: {token: 'must_need', chatid: 'must_need'},
+            discord: {token: 'must_need', chatid: 'must_need', clientid: 'must_need'},
+            imgur: {
+                token: 'must_need', albumid: 'get from url, set if u want img into album',
+                clientid: 'no need after token get',
+                clientsecret: 'no need after token get'
+            } //chatid is imgur album name
+        }
         this.lineNotifyHistory = [];
         this.telegramBotHistory = [];
         this.discordBotHistory = [];
         this.imgurBotHistory = [];
-        if (log2IM_Config) {
+        if (typeof (log2IM_Config) ==='object') {
             this.log2IM_Config = log2IM_Config
-        } else {
-            loadEnvFile('.env');
+            console.log('[init][use][config obj]',this.log2IM_Config)
+        } else if (typeof (log2IM_Config) ==='string') {
+
+            loadEnvFile(log2IM_Config);
+            this.log2IM_Config.line.token = process.env.line_token
+
             this.log2IM_Config.discord.token = process.env.discord_token
             this.log2IM_Config.discord.chatid = process.env.discord_chatid
             this.log2IM_Config.discord.clientid = process.env.discord_clientid
@@ -130,8 +135,10 @@ export class Log2im {
             this.log2IM_Config.imgur.token = process.env.imgur_token
             this.log2IM_Config.imgur.clientid = process.env.imgur_clientid
             this.log2IM_Config.imgur.clientsecret = process.env.imgur_clientsecret
+            console.log('[init][use][string env filepath] path=' ,log2IM_Config,this.log2IM_Config)
+        }else{
+            console.log('[init][use][default]',this.log2IM_Config)
         }
-        console.log('[init][log2im][log2IM_Config]', this.log2IM_Config);
     }
 
     history() {
@@ -663,28 +670,28 @@ export class Log2im {
         try {
             // Notion API endpoint for appending blocks to a page
             const url = `https://api.notion.com/v1/blocks/${pageId}/children`;
-            
+
             console.log(`[Notion] Appending block to page ${pageId}`);
-            
+
             // Headers for the request
             const headers = {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
                 "Notion-Version": "2022-06-28"
             };
-            
+
             // Create the request body with the block to append
             const blockData = {
                 children: [block]
             };
-            
+
             // Send the request to Notion API
             const response = await fetch(url, {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify(blockData)
             });
-            
+
             if (response.ok) {
                 console.log("Block successfully appended to existing page");
                 return true;
@@ -700,11 +707,11 @@ export class Log2im {
     }
 
     async sendToNotion({
-                       text,
-                       image_file,
-                       token = this.log2IM_Config.notion.token,
-                       chatid = this.log2IM_Config.notion.chatid
-                   }) {
+                           text,
+                           image_file,
+                           token = this.log2IM_Config.notion.token,
+                           chatid = this.log2IM_Config.notion.chatid
+                       }) {
         // Authentication - Load API token from environment variables
         if (!token) {
             console.error("Notion API token not found in environment variables");
@@ -726,19 +733,19 @@ export class Log2im {
         if (chatid && !chatid.includes('-') && chatid.length === 32) {
             formattedPageId = `${chatid.slice(0, 8)}-${chatid.slice(8, 12)}-${chatid.slice(12, 16)}-${chatid.slice(16, 20)}-${chatid.slice(20)}`;
         }
-        
+
         // Use the pages API endpoint to create a new page
         const url = `https://api.notion.com/v1/pages`;
-        
+
         console.log('[][][sendToNotion]url=', url);
-        
+
         // Headers for the request
         const headers = {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
             "Notion-Version": "2022-06-28"
         };
-        
+
         // Create a new page with content
         let properties = {
             title: {
@@ -751,7 +758,7 @@ export class Log2im {
                 ]
             }
         };
-        
+
         // Create the request body for creating a page
         // We'll try database_id first, and if that fails, we'll try page_id
         const blockData = {
@@ -761,23 +768,23 @@ export class Log2im {
             properties: properties,
             children: []
         };
-        
+
         // Add text block if provided
         if (text) {
             blockData.children.push({
                 object: "block",
                 type: "paragraph",
                 paragraph: {
-                    rich_text: [{ 
-                        type: "text", 
-                        text: { 
-                            content: text 
-                        } 
+                    rich_text: [{
+                        type: "text",
+                        text: {
+                            content: text
+                        }
                     }]
                 }
             });
         }
-        
+
         // Add image block if provided
         if (image_file) {
             try {
@@ -792,30 +799,30 @@ export class Log2im {
                     },
                     body: JSON.stringify({})
                 });
-                
+
                 if (!fileUploadResponse.ok) {
                     const errorData = await fileUploadResponse.json();
                     console.error("Error creating file upload:", errorData);
                     throw new Error(`Failed to create file upload: ${fileUploadResponse.status}`);
                 }
-                
+
                 const fileUploadData = await fileUploadResponse.json();
                 console.log("File upload object created:", fileUploadData);
-                
+
                 // Step 2: Upload the file content
                 const fileBuffer = await readFile(image_file);
                 const fileName = path.basename(image_file);
-                const fileType = fileName.endsWith('.png') ? 'image/png' : 
-                                 fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg' : 
-                                 'application/octet-stream';
-                
+                const fileType = fileName.endsWith('.png') ? 'image/png' :
+                    fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg' :
+                        'application/octet-stream';
+
                 console.log(`Uploading file ${fileName} to Notion...`);
                 // Create a FormData object for the file upload
                 const formData = new FormData();
                 const fileBlob = new Blob([fileBuffer], { type: fileType });
                 formData.append('file', fileBlob, fileName);
                 formData.append('part_number', '1');
-                
+
                 // Send the file using POST request
                 const uploadResponse = await fetch(fileUploadData.upload_url, {
                     method: "POST",
@@ -826,14 +833,14 @@ export class Log2im {
                     },
                     body: formData
                 });
-                
+
                 if (!uploadResponse.ok) {
                     console.error("Error uploading file:", await uploadResponse.text());
                     throw new Error(`Failed to upload file: ${uploadResponse.status}`);
                 }
-                
+
                 console.log("File uploaded successfully");
-                
+
                 // Step 3: Add the uploaded file to the page as an image block
                 blockData.children.push({
                     object: "block",
@@ -845,9 +852,9 @@ export class Log2im {
                         }
                     }
                 });
-                
+
                 console.log("Image block added to page content");
-                
+
                 // Step 4: Also append the image to the existing page if it was created successfully
                 await this.appendBlockToNotionPage(formattedPageId, {
                     object: "block",
@@ -859,20 +866,20 @@ export class Log2im {
                         }
                     }
                 }, token);
-                
+
             } catch (error) {
                 console.error("Error handling image file for Notion:", error);
-                
+
                 // Fallback: Add a text block mentioning the image
                 blockData.children.push({
                     object: "block",
                     type: "paragraph",
                     paragraph: {
-                        rich_text: [{ 
-                            type: "text", 
-                            text: { 
+                        rich_text: [{
+                            type: "text",
+                            text: {
                                 content: "Failed to upload image: " + path.basename(image_file)
-                            } 
+                            }
                         }]
                     }
                 });
@@ -890,12 +897,12 @@ export class Log2im {
             // If database_id fails, try with page_id
             if (!response.ok && response.status === 404) {
                 console.log("Database ID not found, trying as page_id instead");
-                
+
                 // Update the request body to use page_id instead
                 blockData.parent = {
                     page_id: formattedPageId
                 };
-                
+
                 // Try again with page_id
                 response = await fetch(url, {
                     method: "POST",
@@ -910,7 +917,7 @@ export class Log2im {
             } else {
                 const errorData = await response.json();
                 console.error("Notion API error:", errorData);
-                
+
                 // Provide more helpful error messages based on common issues
                 if (errorData.code === "object_not_found") {
                     console.error("The specified page or block ID was not found.");
@@ -925,7 +932,7 @@ export class Log2im {
                     console.error("Page ID should be in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx");
                     console.error("Or without dashes: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                 }
-                
+
                 throw new Error(`Failed to send message to Notion: ${response.status}`);
             }
         } catch (error) {
@@ -939,19 +946,24 @@ export class Log2im {
      * @param {Object} options - Configuration options
 
      */
-    async sendToAll({
-                        line = this.log2IM_Config.line,
-                        imgur = this.log2IM_Config.imgur,
-                        telegram = this.log2IM_Config.telegram,
-                        discord = this.log2IM_Config.discord,
-                        text,
-                        images
-                    }) {
+    async sendToAll() {
         const results = {
             line: {success: false},
             telegram: {success: false},
             discord: {success: false}
         };
+        const line=this.log2IM_Config.line
+        const telegram=this.log2IM_Config.telegram
+        const discord=this.log2IM_Config.discord
+        const imgur=this.log2IM_Config.imgur
+        const notion=this.log2IM_Config.notion
+        const text=this.log2IM_Config.text
+        const image_file=this.log2IM_Config.image_file
+        const image_url=this.log2IM_Config.image_url
+
+        if (line.token) {
+            console.log('[][line][config]',line)
+        }
         // Send to Discord if configured
         if (discord.token) {
             try {
@@ -959,7 +971,7 @@ export class Log2im {
                     success: true,
                     response: await this.sendToDiscord({
                         text: text,
-                        images: images,
+                        image_file: image_file,
                         token: discord.token,
                         chatid: discord.chatid,
                         clientid: discord.clientid
@@ -979,7 +991,7 @@ export class Log2im {
                     success: true,
                     response: await this.sendToTelegram({
                         text: text,
-                        images: images,
+                        image_file: image_file,
                         token: telegram.token,
                         chatid: telegram.chatid
                     })
@@ -997,7 +1009,7 @@ export class Log2im {
                     success: true,
                     response: await this.sendToIMGUR({
                         text: text,
-                        images: images,
+                        image_file: image_file,
                         token: imgur.token,
                         albumid: imgur.albumid
                     })

@@ -15,14 +15,20 @@ const log2IM_Config = {
 
 // Run the tests
 try {
+    // const log2IM = new Log2im();
     // const log2IM = new Log2im(log2IM_Config);//use above obj
-    const log2IM = new Log2im();//use .env
-    // log2IM.send2discord({text:'send2discord',filepath:'',url:''}).then((r)=>{console.log('',r)})
-    log2IM.sendToDiscord({text:'send2discord',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
-    log2IM.sendToTelegram({text:'send2telegram',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
-    log2IM.sendToIMGUR({text:'imgur_title',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
+    const log2IM = new Log2im('XXX.env');//use .env
+
+    const results = log2IM.sendToAll(log2IM_Config);
+
+    // log2IM.sendToDiscord({text:'send2discord',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
+    // log2IM.sendToTelegram({text:'send2telegram',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
+    // log2IM.sendToIMGUR({text:'imgur_title',image_file:'/Users/x/Pictures/D.png'}).then((r)=>{log2IM.history()})
+    // Test the updated sendToNotion function with an image file
+    // log2IM.sendToNotion({text:'from log2im '+Date.now(),image_file:'/Users/x/Pictures/D.png'}).then((r) => {
+    //     console.log('Notion response:', r);
+    // });
     // log2IM.sendToLineMessaging({text:'send2line'}).then((r)=>{log2IM.history()})
-    // const results = log2IM.sendToAll(log2IM_Config);
 } catch (error) {
   console.error('Error in testSendToAllLineNotify:', error.message);
 }

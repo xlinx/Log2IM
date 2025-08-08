@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<table style="border-width:1px;">
+    <tr>
+        <td><b style="font-size:20px">Notion [🟢ready to use]</b>
+            <ul>
+                <li>Create a Notion integration - <a href="https://www.notion.so/my-integrations">link</a></li>
+                <li>Set NOTION_TOKEN in your .env file</li>
+                <li>Send messages with image files to your Notion workspace</li>
+                <li>Images are uploaded and added both to new pages and appended to existing pages</li>
+                <li>Supports both database entries and direct page updates</li>
+            </ul>
+        </td>
+        <td><img width="100px" src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" alt="">
+        </td>
+    </tr>
+    <tr>
+        <td><b style="font-size:20px">LINE-Bot-MsgAPI [🟠bug fixing]</b>
+            <ul>
+                <li>add bot first- <a href="https://developers.line.biz/zh-hant/services/messaging-api/">link</a></li>
+                <li>later version porting...</li>
+            </ul>
+        </td>
+        <td><img width="100px" src="https://developers.line.biz/assets/img/products/messaging-api/p1.svg" alt=""></td>
+    </tr>
+    <tr>
+        <td><b style="font-size:20px">Telegram - Bot [🟢ready to use]</b>
+            <ul>
+                <li>add bot first- <a href="https://core.telegram.org/api">link</a></li>
+                <li>no-need server(if just send text&img to IM)</li>
+                <li>control node from IM (need cloud server. like AWS lambda)</li>
+                <li>text & image support</li>
+            </ul>
+        </td>
+        <td><img width="100px"
+                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png"
+                 alt=""></td>
+    </tr>
+    <tr>
+        <td><b style="font-size:20px">Discord - Bot [🟢ready to use]</b>
+            <ul>
+                <li>add bot first- <a href="https://discord.com/developers/applications">link</a></li>
+                <li>no-need server(if just send text&img to IM)</li>
+                <li>control node from IM (need cloud server. like AWS lambda)</li>
+                <li>text & image support</li>
+            </ul>
+        </td>
+        <td><img width="100px"
+                 src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0b5061df29d55a92d945_full_logo_blurple_RGB.svg"
+                 alt=""></td>
+    </tr>
+    <tr>
+        <td><b style="font-size:20px">imgur - FreePic [🟢ready to use]</b>
+            <ul>
+                <li>add app first- <a href="https://imgur.com/account/settings/apps">link</a></li>
+                <li> use Client ID、Client Secret to get token</li>
+                <li> If you already have the id and secret, just login with your browser and then on another tab</li>
+                <li>enter this URL (replace CLIENT_ID)
+                <li>https://api.imgur.com/oauth2/authorize?client_id=CLIENT_ID&response_type=token</li>
+                <li>Accept, and from the resulting URL you need to extract the desired tokens</li>
+                <li>other tutorial - <a href="https://rapidapi.com/blog/imgur-api-tutorial/">link</a></li>
+                <li>Upload limits: unlimited, but 50 images per hour.</li>
+            </ul>
+        </td>
+        <td><img width="100px" src="https://s.imgur.com/images/imgur-logo.svg" alt=""></td>
+    </tr>
+    <tr>
+        <td><span
+                style="font-size:20px; text-decoration: line-through;">LINE-Notify(🔴official stop service @2025/04)</span>
+            <ul>
+                <li>LY crop. official stop service @2025/04</li>
+                <li>using 2.LINE-Bot-Messaging API replace Notify services</li>
+            </ul>
+        </td>
+        <td><img width="100px"
+                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/LINE_logo.svg/320px-LINE_logo.svg.png"
+                 alt=""></td>
+    </tr>
+</table>
+</body>
+</html>
