@@ -234,8 +234,10 @@ export class Log2im {
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from LINE Messaging API
      */
-    async sendToLineMessaging(message, channelAccessToken = this.log2IM_Config.line.token, to, imagePath) {
-        const url = 'https://api.line.me/v2/bot/message/push';
+    async sendToLineMessagingBroadcast(message, channelAccessToken , to, imagePath) {
+        if(channelAccessToken===undefined)
+            channelAccessToken = this.log2IM_Config.line.token
+        const url = 'https://api.line.me/v2/bot/message/broadcast';
         const headers = {
             'Authorization': `Bearer ${channelAccessToken}`,
             'Content-Type': 'application/json'
@@ -252,7 +254,7 @@ export class Log2im {
 
                 // Create message object with both text and image
                 body = JSON.stringify({
-                    to: to,
+                    // to: to,
                     messages: [
                         {
                             type: 'text',
@@ -268,7 +270,7 @@ export class Log2im {
             } else {
                 // Text-only message
                 body = JSON.stringify({
-                    to: to,
+                    // to: to,
                     messages: [
                         {
                             type: 'text',
