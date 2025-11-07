@@ -1,6 +1,6 @@
 {
   "name": "log2im",
-  "version": "1.0.125",
+  "version": "1.0.133",
   "description": "log anything into IM(Telgram, Discord, LineBot)",
   "main": "index.js",
   "scripts": {

@@ -1,3 +1,4 @@
+
 // const fs = require('fs').promises;
 // const path = require('path');
 import fs from 'fs';
@@ -5,48 +6,54 @@ import path from 'path';
 import {readFile} from 'node:fs/promises';
 
 // Utility functions
-const trimString = (s, limit, ellipsis = '…') => {
-    s = (s || '').trim();
-    if (s.length > limit) {
-        return s.substring(0, limit - 1).trim() + ellipsis;
-    }
-    return s;
-};
-
-const readFromFile = async (filename) => {
-    try {
-        const data = await fs.readFile(filename, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error(`Error reading file ${filename}:`, error);
-        return null;
-    }
-};
-
-const writeToFile = async (filename, data) => {
-    try {
-        await fs.mkdir(path.dirname(filename), {recursive: true});
-        await fs.writeFile(filename, JSON.stringify(data, null, 4), 'utf8');
-        return true;
-    } catch (error) {
-        console.error(`Error writing to file ${filename}:`, error);
-        return false;
-    }
-};
-const blobToBase64 = (blob) => new Promise((resolve, reject) => {
-    const reader = new FileReader;
-    reader.onerror = reject;
-    reader.onload = () => {
-        resolve(reader.result);
-    };
-    reader.readAsDataURL(blob);
-});
-const b64toBlob = (base64Data) => new Promise((resolve, reject) => {
-    const base64Response = fetch(`data:image/jpeg;base64,${base64Data}`).then((response) => response.blob()).then((myBlob) => {
-        return myBlob
-    });
-
-});
+// const trimString = (s, limit, ellipsis = '…') => {
+//     s = (s || '').trim();
+//     if (s.length > limit) {
+//         return s.substring(0, limit - 1).trim() + ellipsis;
+//     }
+//     return s;
+// };
+//
+// const readFromFile = async (filename) => {
+//     try {
+//          fs.readFile(filename, (err,data)=>{
+//             if(err) throw err;
+//             return JSON.parse(data.toString());
+//         });
+//
+//     } catch (error) {
+//         this.log2IM_Config.silentMode?console.log():console.error(`Error reading file ${filename}:`, error);
+//         return null;
+//     }
+// };
+//
+// const writeToFile = async (filename, data) => {
+//     try {
+//         fs.mkdirSync(path.dirname(filename), {recursive: true});
+//         await fs.writeFile(filename, JSON.stringify(data, null, 4), (err)=>{
+//             if(err) throw err;
+//             return true;
+//         });
+//
+//     } catch (error) {
+//         this.log2IM_Config.silentMode?console.log():console.error(`Error writing to file ${filename}:`, error);
+//         return false;
+//     }
+// };
+// const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+//     const reader = new FileReader;
+//     reader.onerror = reject;
+//     reader.onload = () => {
+//         resolve(reader.result);
+//     };
+//     reader.readAsDataURL(blob);
+// });
+// const b64toBlob = (base64Data) => new Promise((resolve, reject) => {
+//     const base64Response = fetch(`data:image/jpeg;base64,${base64Data}`).then((response) => response.blob()).then((myBlob) => {
+//         return myBlob
+//     });
+//
+// });
 const b64toBlob2 = (b64Data, contentType = 'image/jpeg', sliceSize = 512) => {
     const byteCharacters = atob(b64Data);
     const byteArrays = [];
@@ -67,7 +74,7 @@ const readtoBase64 = async (filepath) => {
         const fileBuffer = await readFile(filepath);
         return fileBuffer.toString('base64');
     } catch (error) {
-        throw new Error(`Failed to read file as base64: ${error.message}`);
+        console.log(`Failed to read file as base64: ${error.message}`);
     }
 };
 
@@ -81,12 +88,12 @@ function loadEnvFile(filePath) {
             const [key, value] = trimmedLine.split('=');
             if (key && value !== undefined) {
                 process.env[key.trim()] = value.trim();
-                // console.log(`[ENV][LOAD]${key}=${value}`);
+                // this.log2IM_Config.silentMode?console.log():console.log(`[ENV][LOAD]${key}=${value}`);
             }
         });
-        console.log('[][DECADE.TW] Environment variables loaded successfully.');
+        this.log2IM_Config.silentMode?console.log():console.log('[][DECADE.TW] Environment variables loaded successfully.');
     } catch (error) {
-        console.error(`[][DECADE.TW]Error loading .env file: ${error.message}`);
+        this.log2IM_Config.silentMode?console.log():console.error(`[][DECADE.TW]Error loading .env file: ${error.message}`);
     }
 }
 
@@ -96,6 +103,7 @@ export class Log2im {
 
     constructor(log2IM_Config) {
         this.log2IM_Config = {
+            silentMode:true,
             text: `wahaha@${Date.now()}`,
             image_url: 'https://www.decade.tw/wp-content/uploads/2021/09/DECADE_new.png',
             image_file: '/Users/x/Pictures/D.png',
@@ -116,7 +124,7 @@ export class Log2im {
         this.imgurBotHistory = [];
         if (typeof (log2IM_Config) ==='object') {
             this.log2IM_Config = log2IM_Config
-            console.log('[init][use][config obj]',this.log2IM_Config)
+            // this.log2IM_Config.silentMode?this.log2IM_Config.silentMode?console.log():console.log():this.log2IM_Config.silentMode?console.log():console.log('[init][use][config obj]',this.log2IM_Config)
         } else if (typeof (log2IM_Config) ==='string') {
 
             loadEnvFile(log2IM_Config);
@@ -135,37 +143,37 @@ export class Log2im {
             this.log2IM_Config.imgur.token = process.env.imgur_token
             this.log2IM_Config.imgur.clientid = process.env.imgur_clientid
             this.log2IM_Config.imgur.clientsecret = process.env.imgur_clientsecret
-            console.log('[init][use][string env filepath] path=' ,log2IM_Config,this.log2IM_Config)
+            // this.log2IM_Config.silentMode?console.log():console.log('[init][use][string env filepath] path=' ,log2IM_Config,this.log2IM_Config)
         }else{
-            console.log('[init][use][default]',this.log2IM_Config)
+            // this.log2IM_Config.silentMode?console.log():console.log('[init][use][default]',this.log2IM_Config)
         }
     }
 
     history() {
-        console.log('==========history')
+        this.log2IM_Config.silentMode?console.log():console.log('==========history')
         this.lineNotifyHistory.forEach(e => {
-            console.log(e)
+            this.log2IM_Config.silentMode?console.log():console.log(e)
         })
         this.telegramBotHistory.forEach(e => {
-            console.log(e)
+            this.log2IM_Config.silentMode?console.log():console.log(e)
         })
         this.discordBotHistory.forEach(e => {
-            console.log(e)
+            this.log2IM_Config.silentMode?console.log():console.log(e)
         })
         this.imgurBotHistory.forEach(e => {
-            console.log(e)
+            this.log2IM_Config.silentMode?console.log():console.log(e)
         })
-        console.log('==========history')
+        this.log2IM_Config.silentMode?console.log():console.log('==========history')
     }
 
     /**
      * Send message to LINE Notify
      * @param {string} message - Message to send
      * @param {string} token - LINE Notify token
-     * @param {string} imagePath - Path to image file (optional)
+     * @param imagePath
      * @returns {Promise<object>} Response from LINE Notify API
      */
-    async sendToLineNotify(message, token = this.log2IM_Config.line.token, image_file) {
+    async sendToLineNotify(message, token = this.log2IM_Config.line.token, imagePath) {
         const url = 'https://notify-api.line.me/api/notify';
         const headers = {'Authorization': `Bearer ${token}`};
 
@@ -173,18 +181,20 @@ export class Log2im {
             let body;
 
             if (imagePath) {
-                const imageFile = await fs.readFile(imagePath);
-                const formData = createFormData({
-                    message: message,
-                    imageFile: {
-                        file: imageFile,
-                        filename: path.basename(imagePath),
-                        contentType: 'image/png'
-                    }
+                await fs.readFile(imagePath,(err,imageFile)=>{
+                    const formData = createFormData({
+                        message: message,
+                        imageFile: {
+                            file: imageFile,
+                            filename: path.basename(imagePath),
+                            contentType: 'image/png'
+                        }
+                    });
+
+                    headers['Content-Type'] = formData.headers['Content-Type'];
+                    body = formData.body;
                 });
 
-                headers['Content-Type'] = formData.headers['Content-Type'];
-                body = formData.body;
             } else {
                 const formData = new URLSearchParams();
                 formData.append('message', message);
@@ -201,7 +211,7 @@ export class Log2im {
             const responseData = await response.json();
 
             if (!response.ok) {
-                throw new Error(responseData.message || 'Failed to send to LINE Notify');
+                console.log(responseData.message || 'Failed to send to LINE Notify');
             }
 
             this.lineNotifyHistory.push({
@@ -213,7 +223,7 @@ export class Log2im {
 
             return responseData;
         } catch (error) {
-            console.error('Error sending to LINE Notify:', error.message);
+            this.log2IM_Config.silentMode?console.log():console.error('Error sending to LINE Notify:', error.message);
 
             this.lineNotifyHistory.push({
                 timestamp: new Date().toISOString(),
@@ -222,19 +232,99 @@ export class Log2im {
                 error: error.message
             });
 
-            throw error;
+            //throw error;
         }
     }
+    async sendToLineMessagingPush(message, channelAccessToken ,groupID_userID,  imagePath) {
+        if(channelAccessToken===undefined)
+            channelAccessToken = this.log2IM_Config.line.token
+        const url = 'https://api.line.me/v2/bot/message/push';
+        const headers = {
+            'Authorization': `Bearer ${channelAccessToken}`,
+            'Content-Type': 'application/json'
+        };
 
+        try {
+            let body;
+
+            if (imagePath) {
+                // For image messages, we need to upload the image first to get an ID
+                // Then send a message with that image ID
+                await fs.readFile(imagePath,(err,imageFile)=>{
+                    const imageBase64 = imageFile.toString('base64');
+                    // Create message object with both text and image
+                    body = JSON.stringify({
+                        to: groupID_userID,
+                        messages: [
+                            {
+                                type: 'text',
+                                text: message
+                            },
+                            {
+                                type: 'image',
+                                originalContentUrl: `data:image/png;base64,${imageBase64}`,
+                                previewImageUrl: `data:image/png;base64,${imageBase64.substring(0, Math.min(1000, imageBase64.length))}`
+                            }
+                        ]
+                    });
+                });
+
+
+
+            } else {
+                // Text-only message
+                body = JSON.stringify({
+                    to: groupID_userID,
+                    messages: [
+                        {
+                            type: 'text',
+                            text: message
+                        }
+                    ]
+                });
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: body
+            });
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                console.log(responseData.message || `Failed to send to LINE Messaging API: ${response.status}`);
+            }
+
+            this.lineNotifyHistory.push({
+                timestamp: new Date().toISOString(),
+                status: 'success',
+                message: 'Message sent to LINE Messaging API',
+                response: responseData
+            });
+
+            return responseData;
+        } catch (error) {
+            this.log2IM_Config.silentMode?console.log():console.error('Error sending to LINE Messaging API:', error.message);
+
+            this.lineNotifyHistory.push({
+                timestamp: new Date().toISOString(),
+                status: 'error',
+                message: 'Failed to send to LINE Messaging API',
+                error: error.message
+            });
+
+            //throw error;
+        }
+    }
     /**
      * Send message via LINE Messaging API
      * @param {string} message - Message to send
      * @param {string} channelAccessToken - LINE Messaging API channel access token
-     * @param {string} to - Recipient user ID
      * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from LINE Messaging API
      */
-    async sendToLineMessagingBroadcast(message, channelAccessToken , to, imagePath) {
+    async sendToLineMessagingBroadcast(message, channelAccessToken ,  imagePath) {
         if(channelAccessToken===undefined)
             channelAccessToken = this.log2IM_Config.line.token
         const url = 'https://api.line.me/v2/bot/message/broadcast';
@@ -249,24 +339,27 @@ export class Log2im {
             if (imagePath) {
                 // For image messages, we need to upload the image first to get an ID
                 // Then send a message with that image ID
-                const imageFile = await fs.readFile(imagePath);
-                const imageBase64 = imageFile.toString('base64');
+                // const imageFile = await fs.readFile(imagePath);
+                // const imageBase64 = imageFile.toString('base64');
+                await fs.readFile(imagePath,(err,imageFile)=> {
+                    const imageBase64 = imageFile.toString('base64');
+                    // Create message object with both text and image
+                    body = JSON.stringify({
+                        // to: to,
+                        messages: [
+                            {
+                                type: 'text',
+                                text: message
+                            },
+                            {
+                                type: 'image',
+                                originalContentUrl: `data:image/png;base64,${imageBase64}`,
+                                previewImageUrl: `data:image/png;base64,${imageBase64.substring(0, Math.min(1000, imageBase64.length))}`
+                            }
+                        ]
+                    });
+                })
 
-                // Create message object with both text and image
-                body = JSON.stringify({
-                    // to: to,
-                    messages: [
-                        {
-                            type: 'text',
-                            text: message
-                        },
-                        {
-                            type: 'image',
-                            originalContentUrl: `data:image/png;base64,${imageBase64}`,
-                            previewImageUrl: `data:image/png;base64,${imageBase64.substring(0, Math.min(1000, imageBase64.length))}`
-                        }
-                    ]
-                });
             } else {
                 // Text-only message
                 body = JSON.stringify({
@@ -289,7 +382,7 @@ export class Log2im {
             const responseData = await response.json();
 
             if (!response.ok) {
-                throw new Error(responseData.message || `Failed to send to LINE Messaging API: ${response.status}`);
+                console.log(responseData.message || `Failed to send to LINE Messaging API: ${response.status}`);
             }
 
             this.lineNotifyHistory.push({
@@ -301,7 +394,7 @@ export class Log2im {
 
             return responseData;
         } catch (error) {
-            console.error('Error sending to LINE Messaging API:', error.message);
+            this.log2IM_Config.silentMode?console.log():console.error('Error sending to LINE Messaging API:', error.message);
 
             this.lineNotifyHistory.push({
                 timestamp: new Date().toISOString(),
@@ -310,7 +403,7 @@ export class Log2im {
                 error: error.message
             });
 
-            throw error;
+            //throw error;
         }
     }
 
@@ -319,16 +412,16 @@ export class Log2im {
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                console.log(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json(); // Parse the JSON response
 
             const chatid = data['result'][0]['message']['chat']['id']
-            console.log('[][][getChatID_Telegram]chatid=', chatid, JSON.stringify(data)); // Log the entire response for inspection
+            this.log2IM_Config.silentMode?console.log():console.log('[][][getChatID_Telegram]chatid=', chatid, JSON.stringify(data)); // Log the entire response for inspection
             return chatid; // Return the parsed JSON
         } catch (error) {
-            console.error('Error getting Telegram updates:', error);
-            throw error;
+            this.log2IM_Config.silentMode?console.log():console.error('Error getting Telegram updates:', error);
+            //throw error;
         }
     }
 
@@ -337,7 +430,6 @@ export class Log2im {
      * @param {string} message - Message to send
      * @param {string} token - Telegram bot token
      * @param {string} chatid - Telegram chat ID
-     * @param {string} images - Path to image file (optional)
      * @returns {Promise<object>} Response from Telegram API
      */
     async sendToTelegram({
@@ -347,7 +439,7 @@ export class Log2im {
                              token = this.log2IM_Config.telegram.token,
                              chatid = this.log2IM_Config.telegram.chatid
                          }) {
-        // console.log('[][][sendToTelegram]text=',text,images, token, chatid)
+        // this.log2IM_Config.silentMode?console.log():console.log('[][][sendToTelegram]text=',text,images, token, chatid)
         try {
             if (chatid.length < 1)
                 chatid = await this.getChatID_Telegram(token)
@@ -355,7 +447,7 @@ export class Log2im {
             let responseData = undefined;
             if (text) {
                 const url = baseUrl + '/sendMessage'
-                console.log(`[][][sendToTelegram] text=${text} chatid=${chatid} url=${url}`)
+                // this.log2IM_Config.silentMode?console.log():console.log(`[][][sendToTelegram] text=${text} chatid=${chatid} url=${url}`)
                 try {
                     await fetch(url, {
                         method: 'POST',
@@ -373,24 +465,26 @@ export class Log2im {
                             message: 'Message sent to Telegram',
                             response: res
                         });
-                        console.log('[][][sendToTelegram]res', res)
+                        // this.log2IM_Config.silentMode?console.log():console.log('[][][sendToTelegram]res', res)
                         return res
+                    }).catch(error=>{
+                        this.log2IM_Config.silentMode?console.log():console.log('[X][][log2im]')
                     });
 
                 } catch (error) {
-                    console.error('Error getting Telegram updates:', error);
-                    throw error;
+                    this.log2IM_Config.silentMode?console.log():console.error('Error getting log2im updates');
+                    // //throw error;
                 }
             }
             if (image_file) {
                 const url = baseUrl + '/sendPhoto'
-                console.log(`[][T][sendPhoto] image_file=${image_file} chatid=${chatid} url=${url}`)
+                // this.log2IM_Config.silentMode?console.log():console.log(`[][T][sendPhoto] image_file=${image_file} chatid=${chatid} url=${url}`)
                 try {
                     const imageBuffer = await readFile(image_file);
                     const imageBlob = new Blob([imageBuffer], {type: 'image/jpeg'}); // Adjust MIME type as needed
                     const formData = new FormData();
                     formData.append('chat_id', chatid)
-                    formData.append('caption', text)
+                    formData.append('caption', image_file)
                     formData.append('photo', imageBlob)
                     await fetch(url, {
                         method: 'POST',
@@ -405,19 +499,19 @@ export class Log2im {
                             message: 'Photo sent to Telegram',
                             response: res
                         });
-                        console.log('[][T][sendPhoto]res', res)
+                        // this.log2IM_Config.silentMode?console.log():console.log('[][T][sendPhoto]res', res)
                         return res
                     });
 
                 } catch (error) {
-                    console.error('Error getting Telegram updates:', error);
-                    throw error;
+                    this.log2IM_Config.silentMode?console.log():console.error('Error getting Telegram updates:', error);
+                    //throw error;
                 }
             }
 
             return responseData;
         } catch (error) {
-            console.error('Error sending to Telegram:', error);
+            this.log2IM_Config.silentMode?console.log():console.error('Error sending to Telegram:', error);
 
             this.telegramBotHistory.push({
                 timestamp: new Date().toISOString(),
@@ -426,16 +520,13 @@ export class Log2im {
                 error: error.message
             });
 
-            throw error;
+            //throw error;
         }
     }
 
     /**
      * Send message to Discord webhook
      * @param {string} message - Message to send
-     * @param {string} webhookUrl - Discord webhook URL
-     * @param {string} username - Custom username for the webhook
-     * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from Discord API
      */
     async sendToDiscord({
@@ -446,18 +537,17 @@ export class Log2im {
                             clientid = this.log2IM_Config.discord.clientid
                         }) {
         try {
-            console.log('[Discord]', text, token, chatid, clientid)
-
-            const addBotintoChannel = `https://discord.com/oauth2/authorize?client_id=${clientid}&permissions=2048&integration_type=0&scope=bot`
-            console.log('[Discord][add bot into channel url][ clientid != chatid ]', addBotintoChannel)
+            // this.log2IM_Config.silentMode?console.log():console.log('[Discord]', text, token, chatid, clientid)
+            // const addBotintoChannel = `https://discord.com/oauth2/authorize?client_id=${clientid}&permissions=2048&integration_type=0&scope=bot`
+            // this.log2IM_Config.silentMode?console.log():console.log('[Discord][add bot into channel url][ clientid != chatid ]', addBotintoChannel)
             if (chatid || chatid.length < 1)
-                console.log('[Discord][chatid][ get chatid from desktop app(right click channel then copy it)]')
+                this.log2IM_Config.silentMode?console.log():console.log('[Discord][chatid][ get chatid from desktop app(right click channel then copy it)]')
 
-            const baseUrl = `https://discord.com/api/v10/channels/${chatid}/messages`;
+            const url = `https://discord.com/api/v10/channels/${chatid}/messages`;
             let responseData = undefined;
             if (text) {
-                const url = baseUrl
-                console.log(`[][][Discord] text=${text} chatid=${chatid} url=${url}`)
+                // const url = baseUrl
+                // this.log2IM_Config.silentMode?console.log():console.log(`[][][Discord] text=${text} chatid=${chatid} url=${url}`)
                 try {
                     await fetch(url, {
                         method: 'POST',
@@ -478,18 +568,18 @@ export class Log2im {
                             message: 'Message sent to Telegram',
                             response: res
                         });
-                        console.log('[][][Discord]res', res)
+                        this.log2IM_Config.silentMode?console.log():console.log('[][][Discord]res', res)
                         return res
                     });
 
                 } catch (error) {
-                    console.error('Error getting Discord updates:', error);
-                    throw error;
+                    this.log2IM_Config.silentMode?console.log():console.error('Error getting Discord updates:', error);
+                    //throw error;
                 }
             }
             if (image_file) {
                 const url = baseUrl
-                console.log(`[][][Discord] images=${image_file} chatid=${chatid} url=${url}`)
+                // this.log2IM_Config.silentMode?console.log():console.log(`[][][Discord] images=${image_file} chatid=${chatid} url=${url}`)
                 const filename = path.basename(image_file)
                 const emb = {
                     // id: 0,filename: filename,
@@ -512,9 +602,9 @@ export class Log2im {
                 try {
 
                     const screenShotBase64 = await readtoBase64(image_file)
-                    // console.log('screenShotBase64',screenShotBase64)
+                    // this.log2IM_Config.silentMode?console.log():console.log('screenShotBase64',screenShotBase64)
                     const imageBlob = b64toBlob2(screenShotBase64)
-                    // console.log('imageBlob',imageBlob)
+                    // this.log2IM_Config.silentMode?console.log():console.log('imageBlob',imageBlob)
 
                     const contentX = {
                         content: '[att]' + text,
@@ -530,7 +620,7 @@ export class Log2im {
                     formData.append('json', JSON.stringify(contentX))
                     formData.append('files', imageBlob, filename)
                     // formData.append('files',imageBlob)
-                    console.log('formData', (formData))
+                    this.log2IM_Config.silentMode?console.log():console.log('formData', (formData))
                     await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -547,20 +637,20 @@ export class Log2im {
                             message: 'Photo sent to Discord',
                             response: res
                         });
-                        console.log('[][T][sendPhoto]res', res)
+                        this.log2IM_Config.silentMode?console.log():console.log('[][T][sendPhoto]res', res)
                         return res
                     });
 
                 } catch (error) {
-                    console.error('Error getting Discord updates:', error);
-                    throw error;
+                    this.log2IM_Config.silentMode?console.log():console.error('Error getting Discord updates:', error);
+                    //throw error;
                 }
             }
 
 
             return responseData;
         } catch (error) {
-            console.error('Error sending to Discord:', error);
+            this.log2IM_Config.silentMode?console.log():console.error('Error sending to Discord:', error);
 
             this.telegramBotHistory.push({
                 timestamp: new Date().toISOString(),
@@ -569,16 +659,13 @@ export class Log2im {
                 error: error.message
             });
 
-            throw error;
+            //throw error;
         }
     }
 
     /**
      * Send message to IMGUR webhook
      * @param {string} message - Message to send
-     * @param {string} webhookUrl - Discord webhook URL
-     * @param {string} username - Custom username for the webhook
-     * @param {string} imagePath - Path to image file (optional)
      * @returns {Promise<object>} Response from Discord API
      */
     async sendToIMGUR({
@@ -588,7 +675,7 @@ export class Log2im {
                           albumid = this.log2IM_Config.imgur.albumid
                       }) {
         try {
-            console.log('[IMGUR]', text, token, albumid)
+            this.log2IM_Config.silentMode?console.log():console.log('[IMGUR]', text, token, albumid)
 
             const baseUrl = `https://api.imgur.com/3/upload`;
 
@@ -597,7 +684,7 @@ export class Log2im {
 
             if (image_file) {
                 const url = baseUrl
-                console.log(`[][][IMGUR] images=${image_file} albumid=${albumid} url=${url}`)
+                // this.log2IM_Config.silentMode?console.log():console.log(`[][][IMGUR] images=${image_file} albumid=${albumid} url=${url}`)
                 const filename = path.basename(image_file)
 
                 try {
@@ -605,7 +692,7 @@ export class Log2im {
                     const imgBase64 = await readtoBase64(image_file)
                     const imageBlob = b64toBlob2(imgBase64)
 
-                    // console.log('screenShotBase64',screenShotBase64)
+                    // this.log2IM_Config.silentMode?console.log():console.log('screenShotBase64',screenShotBase64)
 
                     let formData = new FormData();
                     formData.append('image', 'data:image/png;base64,' + imgBase64)
@@ -621,7 +708,7 @@ export class Log2im {
                     //     name:filename+'_'+Date.now(),
                     //     title:text+'_'+Date.now()
                     // }
-                    console.log('formData', (formData))
+                    this.log2IM_Config.silentMode?console.log():console.log('formData', (formData))
                     await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -641,20 +728,20 @@ export class Log2im {
                             message: 'Photo sent to Discord',
                             response: res
                         });
-                        console.log('[][IMGUR][sendPhoto]res', res)
+                        this.log2IM_Config.silentMode?console.log():console.log('[][IMGUR][sendPhoto]res', res)
                         return res
                     });
 
                 } catch (error) {
-                    console.error('Error getting IMGUR updates:', error);
-                    throw error;
+                    this.log2IM_Config.silentMode?console.log():console.error('Error getting IMGUR updates:', error);
+                    //throw error;
                 }
             }
 
 
             return responseData;
         } catch (error) {
-            console.error('Error sending to IMGUR:', error);
+            this.log2IM_Config.silentMode?console.log():console.error('Error sending to IMGUR:', error);
 
             this.telegramBotHistory.push({
                 timestamp: new Date().toISOString(),
@@ -663,7 +750,7 @@ export class Log2im {
                 error: error.message
             });
 
-            throw error;
+            //throw error;
         }
     }
 
@@ -673,7 +760,7 @@ export class Log2im {
             // Notion API endpoint for appending blocks to a page
             const url = `https://api.notion.com/v1/blocks/${pageId}/children`;
 
-            console.log(`[Notion] Appending block to page ${pageId}`);
+            this.log2IM_Config.silentMode?console.log():console.log(`[Notion] Appending block to page ${pageId}`);
 
             // Headers for the request
             const headers = {
@@ -695,15 +782,15 @@ export class Log2im {
             });
 
             if (response.ok) {
-                console.log("Block successfully appended to existing page");
+                this.log2IM_Config.silentMode?console.log():console.log("Block successfully appended to existing page");
                 return true;
             } else {
                 const errorData = await response.json();
-                console.error("Error appending block to page:", errorData);
+                this.log2IM_Config.silentMode?console.log():console.error("Error appending block to page:", errorData);
                 return false;
             }
         } catch (error) {
-            console.error("Error in appendBlockToNotionPage:", error);
+            this.log2IM_Config.silentMode?console.log():console.error("Error in appendBlockToNotionPage:", error);
             return false;
         }
     }
@@ -716,16 +803,16 @@ export class Log2im {
                        }) {
         // Authentication - Load API token from environment variables
         if (!token) {
-            console.error("Notion API token not found in environment variables");
-            console.error("Please set NOTION_TOKEN in your .env file or provide it in the config object");
+            this.log2IM_Config.silentMode?console.log():console.error("Notion API token not found in environment variables");
+            this.log2IM_Config.silentMode?console.log():console.error("Please set NOTION_TOKEN in your .env file or provide it in the config object");
             return false;
         }
 
         // Check if chatid is provided
         if (!chatid) {
-            console.error("Notion page ID not provided");
-            console.error("Please set notion_chatid in your .env file or provide it in the config object");
-            console.error("You can find your page ID in the URL of your Notion page: https://www.notion.so/[workspace]/[page-id]");
+            this.log2IM_Config.silentMode?console.log():console.error("Notion page ID not provided");
+            this.log2IM_Config.silentMode?console.log():console.error("Please set notion_chatid in your .env file or provide it in the config object");
+            this.log2IM_Config.silentMode?console.log():console.error("You can find your page ID in the URL of your Notion page: https://www.notion.so/[workspace]/[page-id]");
             return false;
         }
 
@@ -739,7 +826,7 @@ export class Log2im {
         // Use the pages API endpoint to create a new page
         const url = `https://api.notion.com/v1/pages`;
 
-        console.log('[][][sendToNotion]url=', url);
+        this.log2IM_Config.silentMode?console.log():console.log('[][][sendToNotion]url=', url);
 
         // Headers for the request
         const headers = {
@@ -791,7 +878,7 @@ export class Log2im {
         if (image_file) {
             try {
                 // Step 1: Create a file upload object
-                console.log("Creating file upload object for Notion...");
+                this.log2IM_Config.silentMode?console.log():console.log("Creating file upload object for Notion...");
                 const fileUploadResponse = await fetch("https://api.notion.com/v1/file_uploads", {
                     method: "POST",
                     headers: {
@@ -804,12 +891,12 @@ export class Log2im {
 
                 if (!fileUploadResponse.ok) {
                     const errorData = await fileUploadResponse.json();
-                    console.error("Error creating file upload:", errorData);
-                    throw new Error(`Failed to create file upload: ${fileUploadResponse.status}`);
+                    this.log2IM_Config.silentMode?console.log():console.error("Error creating file upload:", errorData);
+                    // console.log(`Failed to create file upload: ${fileUploadResponse.status}`);
                 }
 
                 const fileUploadData = await fileUploadResponse.json();
-                console.log("File upload object created:", fileUploadData);
+                this.log2IM_Config.silentMode?console.log():console.log("File upload object created:", fileUploadData);
 
                 // Step 2: Upload the file content
                 const fileBuffer = await readFile(image_file);
@@ -818,7 +905,7 @@ export class Log2im {
                     fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg' :
                         'application/octet-stream';
 
-                console.log(`Uploading file ${fileName} to Notion...`);
+                this.log2IM_Config.silentMode?console.log():console.log(`Uploading file ${fileName} to Notion...`);
                 // Create a FormData object for the file upload
                 const formData = new FormData();
                 const fileBlob = new Blob([fileBuffer], { type: fileType });
@@ -826,7 +913,7 @@ export class Log2im {
                 formData.append('part_number', '1');
 
                 // Send the file using POST request
-                const uploadResponse = await fetch(fileUploadData.upload_url, {
+                const uploadResponse = await fetch(fileUploadData['upload_url'], {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${token}`,
@@ -837,11 +924,11 @@ export class Log2im {
                 });
 
                 if (!uploadResponse.ok) {
-                    console.error("Error uploading file:", await uploadResponse.text());
-                    throw new Error(`Failed to upload file: ${uploadResponse.status}`);
+                    this.log2IM_Config.silentMode?console.log():console.error("Error uploading file:", await uploadResponse.text());
+                    console.log(`Failed to upload file: ${uploadResponse.status}`);
                 }
 
-                console.log("File uploaded successfully");
+                this.log2IM_Config.silentMode?console.log():console.log("File uploaded successfully");
 
                 // Step 3: Add the uploaded file to the page as an image block
                 blockData.children.push({
@@ -855,7 +942,7 @@ export class Log2im {
                     }
                 });
 
-                console.log("Image block added to page content");
+                this.log2IM_Config.silentMode?console.log():console.log("Image block added to page content");
 
                 // Step 4: Also append the image to the existing page if it was created successfully
                 await this.appendBlockToNotionPage(formattedPageId, {
@@ -870,7 +957,7 @@ export class Log2im {
                 }, token);
 
             } catch (error) {
-                console.error("Error handling image file for Notion:", error);
+                this.log2IM_Config.silentMode?console.log():console.error("Error handling image file for Notion:", error);
 
                 // Fallback: Add a text block mentioning the image
                 blockData.children.push({
@@ -898,7 +985,7 @@ export class Log2im {
 
             // If database_id fails, try with page_id
             if (!response.ok && response.status === 404) {
-                console.log("Database ID not found, trying as page_id instead");
+                this.log2IM_Config.silentMode?console.log():console.log("Database ID not found, trying as page_id instead");
 
                 // Update the request body to use page_id instead
                 blockData.parent = {
@@ -914,38 +1001,37 @@ export class Log2im {
             }
 
             if (response.ok) {
-                console.log("Message sent to Notion successfully!");
+                this.log2IM_Config.silentMode?console.log():console.log("Message sent to Notion successfully!");
                 return true;
             } else {
                 const errorData = await response.json();
-                console.error("Notion API error:", errorData);
+                this.log2IM_Config.silentMode?console.log():console.error("Notion API error:", errorData);
 
                 // Provide more helpful error messages based on common issues
                 if (errorData.code === "object_not_found") {
-                    console.error("The specified page or block ID was not found.");
-                    console.error("Make sure the page exists and your integration has access to it.");
-                    console.error("You need to share the page with your integration in Notion.");
-                    console.error("Try creating a database in Notion and sharing it with your integration.");
+                    this.log2IM_Config.silentMode?console.log():console.error("The specified page or block ID was not found.");
+                    this.log2IM_Config.silentMode?console.log():console.error("Make sure the page exists and your integration has access to it.");
+                    this.log2IM_Config.silentMode?console.log():console.error("You need to share the page with your integration in Notion.");
+                    this.log2IM_Config.silentMode?console.log():console.error("Try creating a database in Notion and sharing it with your integration.");
                 } else if (errorData.code === "unauthorized") {
-                    console.error("Your integration doesn't have permission to access this page.");
-                    console.error("Make sure you've shared the page with your integration in Notion.");
+                    this.log2IM_Config.silentMode?console.log():console.error("Your integration doesn't have permission to access this page.");
+                    this.log2IM_Config.silentMode?console.log():console.error("Make sure you've shared the page with your integration in Notion.");
                 } else if (errorData.code === "invalid_request_url") {
-                    console.error("The request URL is invalid. Check your page ID format.");
-                    console.error("Page ID should be in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx");
-                    console.error("Or without dashes: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+                    this.log2IM_Config.silentMode?console.log():console.error("The request URL is invalid. Check your page ID format.");
+                    this.log2IM_Config.silentMode?console.log():console.error("Page ID should be in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx");
+                    this.log2IM_Config.silentMode?console.log():console.error("Or without dashes: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                 }
 
-                throw new Error(`Failed to send message to Notion: ${response.status}`);
+                console.log(`Failed to send message to Notion: ${response.status}`);
             }
         } catch (error) {
-            console.error("Error sending message to Notion:", error);
+            this.log2IM_Config.silentMode?console.log():console.error("Error sending message to Notion:", error);
             return false;
         }
     }
 
     /**
      * Send message to all configured services
-     * @param {Object} options - Configuration options
 
      */
     async sendToAll() {
@@ -964,7 +1050,7 @@ export class Log2im {
         const image_url=this.log2IM_Config.image_url
 
         if (line.token) {
-            console.log('[][line][config]',line)
+            this.log2IM_Config.silentMode?console.log():console.log('[][line][config]',line)
         }
         // Send to Discord if configured
         if (discord.token) {
